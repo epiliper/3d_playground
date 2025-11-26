@@ -1,1 +1,4 @@
 *.o
+*.pch
+build
+editor

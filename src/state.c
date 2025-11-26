@@ -1,3 +1,3 @@
-typedef struct {
+#include "state.h"
 
-} GameState;
+ApplicationState appState = APP_LOAD;

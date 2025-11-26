@@ -16,8 +16,11 @@ void windowCreate(Window *dest, const char *title);
 // Check for input events that correspond to player actions.
 void windowPollPlayerInputs(Window *w);
 
-// Check for anything
-void windowPoll(Window *w);
+// Start the next frame, poll for input.
+void windowStartFrame(Window *w);
+
+// end the frame (swap buffers, tidy up stuff)
+void windowEndFrame(Window *w);
 
 // Window termination procedure
 void windowClose(Window *w);

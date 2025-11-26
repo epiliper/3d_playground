@@ -1,21 +1,11 @@
-#include "cglm/cglm.h"
+#include "camera.h"
+
 #include <math.h>
 #include <stdbool.h>
 
 #define WORLDUP {0, 1, 0}
 
-typedef struct {
-  bool firstmouse;
-  int lastx, lasty;
-  int xoffset, yoffset;
-  float yaw, pitch;
-  float sensitivity;
-  int width, height;
-  mat4 view;
-  mat4 projection;
-  vec3 front, up, right, pos;
-  float fov;
-} FPSCamera;
+#define CAM_FALLBACK_POS {0, 1, 5}
 
 FPSCamera fpsCamera = {
     .firstmouse = true,
@@ -28,6 +18,8 @@ FPSCamera fpsCamera = {
     .width = 0,
     .height = 0,
     .fov = 45.0,
+    .pos = CAM_FALLBACK_POS,
+    .sensitivity = 0.1,
 };
 
 enum FPSCameraMovement {
@@ -40,7 +32,10 @@ enum FPSCameraMovement {
 void fpsCameraMoveTo(FPSCamera *c, vec3 pos) { glm_vec3_copy(pos, c->pos); };
 
 void fpsCameraUpdateMatrices(FPSCamera *c) {
-  glm_lookat(c->front, c->pos, c->up, c->view);
+  vec3 direction;
+  glm_vec3_add(c->pos, c->front, direction);
+
+  glm_lookat(c->pos, direction, c->up, c->view);
   glm_perspective(glm_rad(c->fov), (float)c->width / c->height, 0.1f, 100.0f,
                   c->projection);
 }
@@ -84,14 +79,17 @@ void fpsCameraPan(double xpos, double ypos, FPSCamera *c) {
     c->firstmouse = false;
   };
 
-  c->xoffset = (xpos - c->lastx) * c->sensitivity;
-  c->yoffset = (ypos - c->lasty) * c->sensitivity;
+  xpos *= c->sensitivity;
+  ypos *= c->sensitivity;
+
+  c->xoffset = xpos - c->lastx;
+  c->yoffset = ypos - c->lasty;
 
   c->lastx = xpos;
   c->lasty = ypos;
 
   c->yaw += c->xoffset;
-  c->pitch += c->yoffset;
+  c->pitch -= c->yoffset;
 
   // gimbal lock is unwelcome
   c->pitch = c->pitch > 89.0f ? 89.0f : c->pitch;
@@ -110,4 +108,8 @@ void fpsCameraPan(double xpos, double ypos, FPSCamera *c) {
   glm_normalize(c->up);
 
   fpsCameraUpdateMatrices(c);
+
+  // printf("XPOS: %f YPOS: %f\n", xpos, ypos);
+  // printf("LASTX: %d LASTY: %d\n", c->lastx, c->lasty);
+  // glm_mat4_print(c->view, stdout);
 }

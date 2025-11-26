@@ -1,4 +1,4 @@
-#include "app.c"
+#include "app.h"
 
 int main() {
   applicationStart();

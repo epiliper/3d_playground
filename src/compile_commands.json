@@ -1,0 +1,158 @@
+[
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "keybindings.c",
+   "-o",
+   "build/keybindings.o"
+  ],
+  "file": "keybindings.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "window.c",
+   "build/keybindings.o",
+   "-o",
+   "build/window.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "window.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-o",
+   "editor",
+   "main.c",
+   "build/window.o",
+   "build/keybindings.o",
+   "-L/opt/homebrew/Cellar/glfw/3.4/lib",
+   "-lglfw",
+   "-L/opt/homebrew/Cellar/cglm/0.9.6/lib",
+   "-lcglm",
+   "-lm",
+   "-Ithirdparty -g3 -g -o"
+  ],
+  "file": "main.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "dummy.c",
+   "-o",
+   "build/dummy.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "dummy.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "renderable.c",
+   "-o",
+   "build/renderable.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "renderable.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "utils.c",
+   "-o",
+   "build/utils.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "utils.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "state.c",
+   "-o",
+   "build/state.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "state.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "mouse.c",
+   "-o",
+   "build/mouse.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "mouse.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-c",
+   "camera.c",
+   "-o",
+   "build/camera.o",
+   "-Ithirdparty",
+   "-g3",
+   "-g"
+  ],
+  "file": "camera.c"
+ },
+ {
+  "directory": "/Users/eli/SHARE/editor/src",
+  "arguments": [
+   "gcc",
+   "-o",
+   "editor",
+   "main.c",
+   "build/window.o",
+   "build/keybindings.o",
+   "state.c",
+   "build/renderable.o",
+   "build/mouse.o",
+   "build/dummy.o",
+   "build/camera.o",
+   "thirdparty/glad.c",
+   "build/utils.o",
+   "-L/opt/homebrew/Cellar/glfw/3.4/lib",
+   "-lglfw",
+   "-L/opt/homebrew/Cellar/cglm/0.9.6/lib",
+   "-lcglm",
+   "-lm",
+   "-Ithirdparty",
+   "-g3",
+   "-g",
+   "-fsanitize=address"
+  ],
+  "file": "thirdparty/glad.c"
+ }
+]
