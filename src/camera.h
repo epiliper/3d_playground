@@ -20,10 +20,20 @@ typedef struct {
   float fov;
 } FPSCamera;
 
+typedef enum {
+  FPS_CAM_LEFT,
+  FPS_CAM_RIGHT,
+  FPS_CAM_FORWARD,
+  FPS_CAM_BACK
+} FPSCameraMovement;
+
 extern FPSCamera fpsCamera;
 
 // move camera to 3D position.
 void fpsCameraMoveTo(FPSCamera *c, vec3 pos);
+
+// nudge camera's position by direction and amount
+void fpsCameraMove(FPSCameraMovement direction, float amount, FPSCamera *c);
 
 // update camera view and projection matrices given new state.
 void fpsCameraUpdateMatrices(FPSCamera *c);

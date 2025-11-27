@@ -17,6 +17,7 @@ void dummyLevelLoad() {
 
 void dummyLevelRender() { testSceneRender(); }
 
+// crude example of how a level would be.
 void applicationEventLoop() {
   switch (appState) {
   case APP_LOAD:

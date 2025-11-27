@@ -29,6 +29,8 @@ typedef struct {
 
 extern PlayerBindings playerBindings;
 
+#define KBTN_DOWN(button) playerBindings.pressed[button]
+
 // Set the bindings to their defaults/fallbacks
 void playerBindingsSetDefault(PlayerBindings *p);
 

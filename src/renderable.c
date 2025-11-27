@@ -13,6 +13,10 @@ void renderableDraw(Renderable *r, RenderPayload *context) {
 void renderableCreate(void *obj, void (*init)(RenderInfo *r),
                       void (*render)(void *self));
 
+//
+// GLSL shader utility functions
+//
+
 unsigned int shaderFromFileVF(const char *vertfile, const char *fragfile) {
   unsigned int frag, vert;
   const char *src_string;

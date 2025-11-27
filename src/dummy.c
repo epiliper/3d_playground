@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "glad.h"
 #include "mouse.h"
+#include "keybindings.h"
 
 // clang-format off
 float CUBE_VERTICES[72] = {
@@ -136,10 +137,10 @@ unsigned int CUBE_INDICES[36] = {
 //
 
 Cube testCube = {
-    .pos = {0, 0, 10},
-    .color = {1, 0, 0, 1},
-    .height = 2,
-    .width = 1,
+    .pos = {0, 0, -5},
+    .color = {1, 1, 0, 0.5},
+    .height = 5,
+    .width = 10,
 };
 
 const char *cubeVert =
@@ -209,12 +210,30 @@ void cubeRender(Cube *c, RenderPayload r) {
 
 void testScenePrepare() { cubeRenderInit(&testCube); }
 
-void testSceneRender() {
-  fpsCameraPan(mouse.xpos, mouse.ypos, &fpsCamera);
-  // glEnable(GL_DEPTH_TEST);
+void testSceneProcessInput() {
+#define CMOVE 0.1
+  if (KBTN_DOWN(P_LEFT)) {
+    fpsCameraMove(FPS_CAM_LEFT, CMOVE, &fpsCamera);
+  }
+  if (KBTN_DOWN(P_RIGHT)) {
+    fpsCameraMove(FPS_CAM_RIGHT, CMOVE, &fpsCamera);
+  }
+  if (KBTN_DOWN(P_FORW)) {
+    fpsCameraMove(FPS_CAM_FORWARD, CMOVE, &fpsCamera);
+  }
+  if (KBTN_DOWN(P_BACK)) {
+    fpsCameraMove(FPS_CAM_BACK, CMOVE, &fpsCamera);
+  }
+}
 
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+void testSceneRender() {
+  // fpsCameraPan(mouse.xpos, mouse.ypos, &fpsCamera);
+  testSceneProcessInput();
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  // glEnable(GL_DEPTH_TEST);
   cubeRender(&testCube, (RenderPayload){.proj = &fpsCamera.projection,
                                         .view = &fpsCamera.view});
   // glDisable(GL_DEPTH_TEST);
