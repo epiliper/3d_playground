@@ -113,17 +113,5 @@ void fpsCameraPan(double xpos, double ypos, FPSCamera *c) {
   c->pitch = c->pitch > 89.0f ? 89.0f : c->pitch;
   c->pitch = c->pitch < -89.0f ? -89.0f : c->pitch;
 
-  // compute left, right and up directions for view matrix
-  c->front[0] = cos(glm_rad(c->yaw)) * cos(glm_rad(c->pitch));
-  c->front[1] = sin(glm_rad(c->pitch));
-  c->front[2] = sin(glm_rad(c->yaw)) * cos(glm_rad(c->pitch));
-  glm_normalize(c->front);
-
-  glm_cross(c->front, (vec3)WORLDUP, c->right);
-  glm_normalize(c->right);
-
-  glm_cross(c->right, c->front, c->up);
-  glm_normalize(c->up);
-
   fpsCameraUpdateMatrices(c);
 }

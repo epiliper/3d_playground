@@ -1,12 +1,14 @@
 BUILD_DIR := build
-CFLAGS := -Ithirdparty -g3 -g
+CFLAGS := -Ithirdparty -g3 -g -lm
 GL := thirdparty/glad.c
+
+MAKE_BUILD_DIR := $(shell mkdir -p $(BUILD_DIR))
 
 editor: main.c window dummy renderable utils state mouse state.c camera keybindings utils glad app
 	gcc -o editor main.c $(BUILD_DIR)/window.o $(BUILD_DIR)/keybindings.o \
 		state.c $(BUILD_DIR)/renderable.o $(BUILD_DIR)/mouse.o $(BUILD_DIR)/dummy.o \
 		$(BUILD_DIR)/camera.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/app.o \
-		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS) -fsanitize=address;
+		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS);
 	./editor
 
 renderable: renderable.h renderable.c

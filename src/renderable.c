@@ -1,7 +1,7 @@
 #include "renderable.h"
 #include "glad.h"
 #include "utils.h"
-#include <OpenGL/gl.h>
+// #include <OpenGL/gl.h>
 
 int success;
 char infoLog[512];

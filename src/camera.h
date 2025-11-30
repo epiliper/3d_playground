@@ -9,8 +9,8 @@
 // drag.
 typedef struct {
   bool firstmouse;
-  int lastx, lasty;
-  int xoffset, yoffset;
+  float lastx, lasty;
+  float xoffset, yoffset;
   float yaw, pitch;
   float sensitivity;
   int width, height;
