@@ -1,17 +1,83 @@
 #include "renderable.h"
 #include "glad.h"
 #include "utils.h"
-// #include <OpenGL/gl.h>
+#include "cube.h"
+#include "string.h" // memset
 
 int success;
 char infoLog[512];
 
+//
+// Renderable
+//
+
 void renderableDraw(Renderable *r, RenderPayload *context) {
-  r->funcs.render(r->data, *context);
+  // r->RenderFunc(r->data, *context);
 }
 
 void renderableCreate(void *obj, void (*init)(RenderInfo *r),
                       void (*render)(void *self));
+
+//
+// Renderer
+//
+
+Renderer renderer = {.items = NULL, .rinfo = NULL, .n_items = 0, .n_rinfo = 0};
+
+const int RENDER_SLOT_EMPTY = 1 << 10;
+
+void rendererInitWithCapacity(int cap) {
+  if (renderer.items != NULL)
+    free(renderer.items);
+  if (renderer.rinfo != NULL)
+    free(renderer.rinfo);
+
+  renderer.n_items = 0, renderer.n_rinfo = 0;
+
+  // TODO: Handle errors here.
+  renderer.items = malloc(sizeof(Renderable) * cap);
+  renderer.rinfo = malloc(sizeof(RenderInfo) * cap);
+
+  for (int i = 0; i < cap; i++) {
+    renderer.rinfo[i].vao = RENDER_SLOT_EMPTY;
+  }
+}
+
+void rendererAddItem(void *item, int shape, int tex) {
+  int bucket = 0;
+  RenderInfo rinfo;
+  RenderFunc rfunc;
+
+  switch (shape) {
+  case 0: {
+    Cube *c = item;
+    if (renderer.rinfo[0].vao == RENDER_SLOT_EMPTY) {
+      rinfo = cubeRenderInit();
+      renderer.rinfo[0] = rinfo;
+      renderer.n_rinfo++;
+    }
+
+    rinfo = renderer.rinfo[0];
+    rfunc = (RenderFunc)cubeRender;
+  }
+  }
+
+  // TODO: handle textures.
+
+  bucket = shape;
+
+  Renderable r = {.data = item, .rfunc = rfunc, .rinfo = rinfo};
+  renderer.items[renderer.n_items] = r;
+  renderer.n_items++;
+}
+
+void rendererDrawAll(RenderPayload renderPayload) {
+  Renderable *r;
+  for (int i = 0; i < renderer.n_items; i++) {
+    r = &renderer.items[i];
+    r->rfunc(r->data, r->rinfo, renderPayload);
+  }
+}
 
 //
 // GLSL shader utility functions

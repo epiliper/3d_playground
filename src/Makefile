@@ -4,10 +4,10 @@ GL := thirdparty/glad.c
 
 MAKE_BUILD_DIR := $(shell mkdir -p $(BUILD_DIR))
 
-editor: main.c window dummy renderable utils state mouse state.c camera keybindings utils glad app
+editor: main.c window dummy renderable utils state mouse state.c camera keybindings utils glad app cube
 	gcc -o editor main.c $(BUILD_DIR)/window.o $(BUILD_DIR)/keybindings.o \
 		state.c $(BUILD_DIR)/renderable.o $(BUILD_DIR)/mouse.o $(BUILD_DIR)/dummy.o \
-		$(BUILD_DIR)/camera.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/app.o \
+		$(BUILD_DIR)/camera.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/app.o $(BUILD_DIR)/cube.o \
 		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS);
 	./editor
 
@@ -32,11 +32,14 @@ camera: camera.h camera.c
 state: state.c state.h
 	gcc -c state.c -o $(BUILD_DIR)/state.o $(CFLAGS)
 
-dummy: dummy.c dummy.h
-	gcc -c dummy.c -o $(BUILD_DIR)/dummy.o $(CFLAGS)
+dummy: dummy.c dummy.h cube
+	gcc -c dummy.c $(BUILD_DIR)/cube.o -o $(BUILD_DIR)/dummy.o $(CFLAGS)
 
 mouse: mouse.c mouse.h window.h window.c
 	gcc -c mouse.c -o $(BUILD_DIR)/mouse.o $(CFLAGS)
 
 glad: glad.c
 	gcc -c glad.c -o $(BUILD_DIR)/glad.o $(CFLAGS)
+
+cube: cube.c cube.h
+	gcc -c cube.c -o $(BUILD_DIR)/cube.o $(CFLAGS)
