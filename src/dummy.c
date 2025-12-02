@@ -31,6 +31,10 @@ void testSceneProcessInput() {
   if (KBTN_DOWN(P_BACK)) {
     fpsCameraMove(FPS_CAM_BACK, CMOVE, &fpsCamera);
   }
+  if (KBTN_DOWN(P_ISO_TOGGLE)) {
+    fpsCameraToggleIso(&fpsCamera);
+    KBTN_RELEASE(P_ISO_TOGGLE);
+  }
 }
 
 void testSceneRender() {

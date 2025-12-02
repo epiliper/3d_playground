@@ -48,7 +48,10 @@ void windowCreate(Window *dest, const char *title) {
   }
 
   // TODO: don't initialize keybinds here
+  // ALSO: need to make a function that wraps these, since order is important.
   playerBindingsSetDefault(&playerBindings);
+  playerBindingsSetCallbacks(dest->inner);
+
   mouseInit(dest);
 
   glfwSetInputMode(dest->inner, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -61,9 +64,14 @@ bool windowShouldClose(Window *w) {
 
 void windowPollPlayerInputs(Window *w) {
   for (int i = 0; i < N_PLAYER_BINDINGS; i++) {
+
+    // we handle keystate for this in a callback elsewhere
+    if (playerBindings.has_callback[i]) {
+      continue;
+    }
+
     if (glfwGetKey(w->inner, playerBindings.binds[i]) == GLFW_PRESS) {
       playerBindings.pressed[i] = 1;
-      // printf("KEY CODE %d pressed\n", playerBindings.binds[i]);
     } else {
       playerBindings.pressed[i] = 0;
     }

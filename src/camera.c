@@ -3,24 +3,59 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define WORLDUP {0, 1, 0}
 
 #define CAM_FALLBACK_POS {0, 1, 0}
 
-FPSCamera fpsCamera = {.firstmouse = true,
-                       .lastx = 0,
-                       .lasty = 0,
-                       .xoffset = 0,
-                       .yoffset = 0,
-                       .yaw = -90,
-                       .pitch = 0,
-                       .width = 0,
-                       .height = 0,
-                       .fov = 45.0,
-                       .pos = CAM_FALLBACK_POS,
-                       .sensitivity = 0.1,
-                       .front = {-0.5, 0, -1}};
+enum {
+  CAM_FPS,
+  CAM_ISO,
+};
+
+FPSCamera fpsCamera = {
+    .firstmouse = true,
+    .lastx = 0,
+    .lasty = 0,
+    .xoffset = 0,
+    .yoffset = 0,
+    .yaw = -90,
+    .pitch = 0,
+    .width = 0,
+    .height = 0,
+    .fov = 45.0,
+    .pos = CAM_FALLBACK_POS,
+    .sensitivity = 0.1,
+    .front = {-0.5, 0, -1},
+    .mode = CAM_FPS,
+};
+
+static float last_pitch;
+static vec3 last_pos;
+
+void fpsCameraToggleIso(FPSCamera *c) {
+  switch (c->mode) {
+  case CAM_FPS:
+    glm_vec3_copy(c->pos, last_pos);
+    last_pitch = c->pitch;
+    c->pitch = -89.0;
+    c->pos[1] += 30;
+    c->mode = CAM_ISO;
+    break;
+
+  case CAM_ISO:
+    c->pitch = last_pitch;
+    last_pos[0] = c->pos[0];
+    last_pos[2] = c->pos[2];
+    glm_vec3_copy(last_pos, c->pos);
+    c->mode = CAM_FPS;
+    break;
+  }
+
+  c->firstmouse = true;
+  fpsCameraUpdateMatrices(c);
+}
 
 void fpsCameraMoveTo(FPSCamera *c, vec3 pos) { glm_vec3_copy(pos, c->pos); };
 

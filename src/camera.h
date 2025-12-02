@@ -18,6 +18,7 @@ typedef struct {
   mat4 projection;
   vec3 front, up, right, pos;
   float fov;
+  int mode;
 } FPSCamera;
 
 typedef enum {
@@ -46,5 +47,8 @@ void fpsCameraChangeFOV(FPSCamera *c, float fov);
 
 // update internal camera state given a mouse drag event and recompute matrices
 void fpsCameraPan(double xpos, double ypos, FPSCamera *c);
+
+// toggle between top-down and FPS view
+void fpsCameraToggleIso(FPSCamera *c);
 
 #endif

@@ -2,10 +2,31 @@
 #include "string.h" // memset
 
 #include "keybindings.h"
+#include "stdio.h"
 
 PlayerBindings playerBindings = {0};
 
-#define KSET_BIND(bindings, action, key) bindings->binds[action] = key;
+void keyAddCallback(PlayerBindings *p, int key, int action) {
+  KeyCallbacksToCheck *cb = &p->callbacks;
+
+  if (cb->n == N_PLAYER_BINDINGS)
+    return;
+
+  cb->keys[cb->n] = key;
+  cb->handles[cb->n] = &p->pressed[action];
+  cb->n++;
+}
+
+// define a keybinding that fires with every key press/repeat
+#define KSET_BIND(bindings, action, key)                                       \
+  bindings->binds[action] = key;                                               \
+  bindings->has_callback[action] = 0;
+
+// override default key detection with a callback func called on keypress.
+#define KSET_BIND_CALLBACK(bindings, action, key)                              \
+  bindings->binds[action] = key;                                               \
+  bindings->has_callback[action] = 1;                                          \
+  keyAddCallback(bindings, key, action);
 
 // ==============================
 // Default/fallback keybindings.
@@ -25,6 +46,23 @@ static const int K_AIM = GLFW_MOUSE_BUTTON_RIGHT;
 // misc
 static const int K_INV = GLFW_KEY_I;
 static const int K_PAUSE = GLFW_KEY_ESCAPE;
+static const int K_CAM_ISO = GLFW_KEY_Q;
+
+void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
+                                  int action, int mods) {
+  for (int i = 0; i < playerBindings.callbacks.n; i++) {
+    if (key == playerBindings.callbacks.keys[i] && action == GLFW_PRESS) {
+      *playerBindings.callbacks.handles[i] = 1;
+      printf("Callback detected key %d pressed!\n", key);
+    } else {
+      *playerBindings.callbacks.handles[i] = 0;
+    }
+  }
+}
+
+void playerBindingsSetCallbacks(void *w) {
+  glfwSetKeyCallback((GLFWwindow *)w, playerBindingsCheckCallbacks);
+}
 
 void playerBindingsSetDefault(PlayerBindings *p) {
   KSET_BIND(p, P_LEFT, K_LEFT);
@@ -39,6 +77,8 @@ void playerBindingsSetDefault(PlayerBindings *p) {
 
   KSET_BIND(p, P_INV, K_INV);
   KSET_BIND(p, P_PAUSE, K_PAUSE);
+
+  KSET_BIND_CALLBACK(p, P_ISO_TOGGLE, K_CAM_ISO);
 }
 
 // TODO: update this to detect key collision logic.
