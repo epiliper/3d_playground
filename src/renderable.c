@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "cube.h"
 #include "string.h" // memset
+#include "mouse.h"
 
 int success;
 char infoLog[512];
@@ -22,7 +23,11 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // Renderer
 //
 
-Renderer renderer = {.items = NULL, .rinfo = NULL, .n_items = 0, .n_rinfo = 0};
+Renderer renderer = {.items = NULL,
+                     .rinfo = NULL,
+                     .n_items = 0,
+                     .n_rinfo = 0,
+                     .track_stencil = true};
 
 const int RENDER_SLOT_EMPTY = 1 << 10;
 
@@ -73,10 +78,20 @@ void rendererAddItem(void *item, int shape, int tex) {
 
 void rendererDrawAll(RenderPayload renderPayload) {
   Renderable *r;
+
   for (int i = 0; i < renderer.n_items; i++) {
+    if (renderer.track_stencil)
+      glStencilFunc(GL_ALWAYS, i, 0xFF);
+
     r = &renderer.items[i];
-    r->rfunc(r->data, r->rinfo, renderPayload);
+    r->rfunc(r->data, r->rinfo, renderPayload, NULL);
   }
+
+  // if (mouse.picked != MOUSE_NO_PICK) {
+  //    RenderMods m = {.color = &(vec4){0.33, 0.33, 1.0, 1.0}, .scale_x = 1.05,
+  //    .scale_y = 1.05}; r = &renderer.items[mouse.picked]; r->rfunc(r->data,
+  //    r->rinfo, renderPayload, &m);
+  //  }
 }
 
 //

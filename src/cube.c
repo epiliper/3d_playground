@@ -111,7 +111,7 @@ RenderInfo cubeRenderInit() {
 
 }
 
-void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r) {
+void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
   glUseProgram(rinfo.shader);
 
@@ -119,15 +119,25 @@ void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r) {
   shaderSetMat4(rinfo.shader, "view", *r.view);
   shaderSetVec3(rinfo.shader, "pos", c->pos);
 
+
   mat4 model;
   glm_mat4_identity(model);
   glm_translate(model, c->pos); // move to pos
 
   // apply length/width
   model[0][0] = c->width;
+  if (mods != NULL) model[0][0] *= mods->scale_x;
+
   model[1][1] = c->height;
+  if (mods != NULL) model[0][0] *= mods->scale_y;
 
   shaderSetMat4(rinfo.shader, "model", model);
-  shaderSetVec4(rinfo.shader, "color", c->color);
+
+  if (mods != NULL && mods->color != NULL) {
+    shaderSetVec4(rinfo.shader, "color", *mods->color);
+    } else {
+      shaderSetVec4(rinfo.shader, "color", c->color);
+    }
+
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }

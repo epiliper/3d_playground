@@ -53,7 +53,6 @@ void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
   for (int i = 0; i < playerBindings.callbacks.n; i++) {
     if (key == playerBindings.callbacks.keys[i] && action == GLFW_PRESS) {
       *playerBindings.callbacks.handles[i] = 1;
-      printf("Callback detected key %d pressed!\n", key);
     } else {
       *playerBindings.callbacks.handles[i] = 0;
     }

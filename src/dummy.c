@@ -15,6 +15,9 @@ Cube testCube = {
 void testScenePrepare() {
   rendererInitWithCapacity(1);
   rendererAddItem(&testCube, 0, 0);
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_STENCIL_TEST);
 }
 
 void testSceneProcessInput() {
@@ -41,7 +44,7 @@ void testSceneRender() {
   testSceneProcessInput();
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   RenderPayload r = {.proj = &fpsCamera.projection, .view = &fpsCamera.view};
 

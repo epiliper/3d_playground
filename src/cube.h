@@ -10,6 +10,6 @@ typedef struct {
 } Cube;
 
 RenderInfo cubeRenderInit();
-void cubeRender(Cube *c, RenderInfo i, RenderPayload r);
+void cubeRender(Cube *c, RenderInfo i, RenderPayload r, RenderMods *mods);
 
 #endif

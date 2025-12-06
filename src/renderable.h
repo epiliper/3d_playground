@@ -15,7 +15,13 @@ typedef struct {
   mat4 *proj, *view;
 } RenderPayload;
 
-typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r);
+typedef struct {
+  vec4 *color;
+  float scale_x, scale_y;
+} RenderMods;
+
+typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r,
+                           RenderMods *mods);
 
 // A wrapper around data that describes how it is rendered.
 typedef struct {
@@ -48,6 +54,7 @@ typedef struct {
   RenderInfo *rinfo;
   Renderable *items;
   int n_items, n_rinfo;
+  bool track_stencil;
 } Renderer;
 
 // const int RENDERER_SLOT_EMPTY = 1 << 4;
