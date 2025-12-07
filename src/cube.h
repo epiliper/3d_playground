@@ -9,7 +9,12 @@ typedef struct {
   float height, width;
 } Cube;
 
+// create buffers, copy vertex data, init shaders
 RenderInfo cubeRenderInit();
+
 void cubeRender(Cube *c, RenderInfo i, RenderPayload r, RenderMods *mods);
+
+// update a supplied matrix to the model matrix of the cube.
+void cubeUpdateModel(Cube *c, mat4 *dest);
 
 #endif

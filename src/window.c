@@ -54,7 +54,7 @@ void windowCreate(Window *dest, const char *title) {
 
   mouseInit(dest);
 
-  glfwSetInputMode(dest->inner, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  // glfwSetInputMode(dest->inner, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   fpsCameraChangeResolution(&fpsCamera, dest->resX, dest->resY);
 }

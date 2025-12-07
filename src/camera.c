@@ -7,7 +7,7 @@
 
 #define WORLDUP {0, 1, 0}
 
-#define CAM_FALLBACK_POS {0, 1, 0}
+#define CAM_FALLBACK_POS {0, 1, 5}
 
 enum {
   CAM_FPS,

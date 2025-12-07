@@ -23,9 +23,13 @@ typedef struct {
 typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r,
                            RenderMods *mods);
 
+// Modify an outside model matrix to represent the object
+typedef void (*ModelFunc)(void *self, mat4 *dest);
+
 // A wrapper around data that describes how it is rendered.
 typedef struct {
   RenderFunc rfunc;
+  ModelFunc mfunc;
   RenderInfo rinfo;
   void *data;
 } Renderable;
@@ -54,7 +58,7 @@ typedef struct {
   RenderInfo *rinfo;
   Renderable *items;
   int n_items, n_rinfo;
-  bool track_stencil;
+  bool track_picking;
 } Renderer;
 
 // const int RENDERER_SLOT_EMPTY = 1 << 4;
@@ -86,5 +90,30 @@ void shaderSetVec4(unsigned int shader, const char *uni, vec4 dat);
 void shaderSetMat4(unsigned int shader, const char *uni, mat4 dat);
 void shaderSetVec3(unsigned int shader, const char *uni, vec3 dat);
 void shaderSetFloat(unsigned int shader, const char *uni, float dat);
+
+// ==============
+// Picking system
+// ==============
+
+typedef struct {
+  unsigned int fbo, picktex, depthtex, shader;
+  unsigned int pbos[2];
+  unsigned int pbo_idx;
+  mat4 temp_model;
+  bool awaiting_pick;
+} PickingSystem;
+
+extern PickingSystem pickingSystem;
+
+void pickingSystemInit(int screenResX, int screenResY);
+
+// query picking data from the picking buffer.
+void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY);
+
+bool pickingGetAsync(PickingSystem *t, uint32_t *dest);
+
+// draw all renderables to a picking framebuffer.
+void rendererPickingPhase(PickingSystem *t, Renderable *r, int n,
+                          RenderPayload renderPayload);
 
 #endif

@@ -4,6 +4,7 @@
 #include "keybindings.h"
 #include "cube.h"
 #include "renderable.h"
+#include "app.h"
 
 Cube testCube = {
     .pos = {0, 0, -5},
@@ -14,10 +15,10 @@ Cube testCube = {
 
 void testScenePrepare() {
   rendererInitWithCapacity(1);
+  pickingSystemInit(APP.window.resX, APP.window.resY);
   rendererAddItem(&testCube, 0, 0);
 
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_STENCIL_TEST);
 }
 
 void testSceneProcessInput() {

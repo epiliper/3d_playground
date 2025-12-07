@@ -111,9 +111,21 @@ RenderInfo cubeRenderInit() {
 
 }
 
+void cubeUpdateModel(Cube *c, mat4 *dest) {
+  glm_mat4_identity(*dest);
+  glm_translate(*dest, c->pos);
+
+  *dest[0][0] = c->width;
+  *dest[1][1] = c->height;
+}
+
 void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
   glUseProgram(rinfo.shader);
+
+  float scale_x = mods != NULL ? mods->scale_x : 1.0;
+  float scale_y = mods != NULL ? mods->scale_x : 1.0;
+  float scale_z = mods != NULL ? 1.05 : 1.0;
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);
@@ -125,11 +137,9 @@ void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glm_translate(model, c->pos); // move to pos
 
   // apply length/width
-  model[0][0] = c->width;
-  if (mods != NULL) model[0][0] *= mods->scale_x;
-
-  model[1][1] = c->height;
-  if (mods != NULL) model[0][0] *= mods->scale_y;
+  model[0][0] = c->width * scale_x;
+  model[1][1] = c->height * scale_y;
+  model[2][2] *= scale_z;
 
   shaderSetMat4(rinfo.shader, "model", model);
 
