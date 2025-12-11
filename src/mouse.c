@@ -6,14 +6,27 @@
 
 Mouse mouse;
 
-void mouseUpdatePos(GLFWwindow *window, double xpos, double ypos) {
+void mouseUpdatePosFPS(GLFWwindow *window, double xpos, double ypos) {
+  mouse.lastx = mouse.xpos;
+  mouse.lasty = mouse.ypos;
   mouse.xpos = xpos;
   mouse.ypos = ypos;
+  // mouse.picked[0] = 0;
+  // mouse.npick = 1;
   fpsCameraPan(xpos, ypos, &fpsCamera);
 };
 
+void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    mouse.left_dwn = true;
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    mouse.right_dwn = true;
+}
+
 void mouseInit(Window *w) {
-  glfwSetCursorPosCallback(w->inner, mouseUpdatePos);
+  glfwSetCursorPosCallback(w->inner, mouseUpdatePosFPS);
+  glfwSetMouseButtonCallback(w->inner, mouseButtonCallback);
   glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 

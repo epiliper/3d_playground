@@ -33,6 +33,9 @@ Renderer renderer = {.items = NULL,
 const int RENDER_SLOT_EMPTY = 1 << 10;
 
 void rendererInitWithCapacity(int cap) {
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   if (renderer.items != NULL)
     free(renderer.items);
   if (renderer.rinfo != NULL)
@@ -88,16 +91,39 @@ void rendererDrawAll(RenderPayload renderPayload) {
     r->rfunc(r->data, r->rinfo, renderPayload, NULL);
   }
 
+  // case 1: we have an object selected and are moving it.
+  if (mouse.npick > 0) {
+    for (int i = 0; i < mouse.npick; i++) {
+      r = &renderer.items[mouse.picked[i]];
+      RenderMods m = {
+          .color = &(vec4){1.0, 0.33, 0.33, 0.22},
+          .scale_x = 1.05,
+          .scale_y = 1.05,
+          .scale_z = 1.05,
+
+      };
+
+      r->rfunc(r->data, r->rinfo, renderPayload, &m);
+    }
+    return;
+  }
+
+  // case 2: we are looking for objects to select.
   if (renderer.track_picking) {
     uint32_t picked = 0;
     rendererPickingPhase(&pickingSystem, renderer.items, renderer.n_items,
                          renderPayload);
 
     pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
+
     if (pickingGetAsync(&pickingSystem, &picked) && picked != 0) {
-      RenderMods m = {.color = &(vec4){0.33, 0.33, 1.0, 1.0},
-                      .scale_x = 1.05,
-                      .scale_y = 1.05};
+      RenderMods m = {
+          .color = &(vec4){0.33, 0.33, 1.0, 0.22},
+          .scale_x = 1.05,
+          .scale_y = 1.05,
+          .scale_z = 1.05,
+
+      };
 
       r = &renderer.items[picked - 1];
       r->rfunc(r->data, r->rinfo, renderPayload, &m);

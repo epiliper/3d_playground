@@ -125,7 +125,7 @@ void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
 
   float scale_x = mods != NULL ? mods->scale_x : 1.0;
   float scale_y = mods != NULL ? mods->scale_x : 1.0;
-  float scale_z = mods != NULL ? 1.05 : 1.0;
+  float scale_z = mods != NULL ? mods->scale_z : 1.0;
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);

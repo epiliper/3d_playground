@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
   vec4 *color;
-  float scale_x, scale_y;
+  float scale_x, scale_y, scale_z;
 } RenderMods;
 
 typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r,

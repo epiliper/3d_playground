@@ -8,7 +8,7 @@
 
 Cube testCube = {
     .pos = {0, 0, -5},
-    .color = {1, 1, 0, 0.5},
+    .color = {1, 1, 0, 1.0},
     .height = 5,
     .width = 10,
 };

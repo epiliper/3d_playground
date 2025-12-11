@@ -9,8 +9,11 @@
 
 typedef struct {
   double xpos, ypos;
+  double lastx, lasty;
+  bool left_dwn, right_dwn;
   float NDC[2];
   int picked[MOUSE_MAX_PICK];
+  int npick;
 } Mouse;
 
 typedef struct {
@@ -24,7 +27,7 @@ extern Mouse mouse;
 
 void mouseInit(Window *w);
 
-// Use ray-cast picking to select objects 
+// Use ray-cast picking to select objects
 void mousePick3D();
 void mousePick2D();
 #endif
