@@ -11,15 +11,14 @@ void mouseUpdatePosFPS(GLFWwindow *window, double xpos, double ypos) {
   mouse.lasty = mouse.ypos;
   mouse.xpos = xpos;
   mouse.ypos = ypos;
-  // mouse.picked[0] = 0;
-  // mouse.npick = 1;
-  fpsCameraPan(xpos, ypos, &fpsCamera);
+  // fpsCameraPan(xpos, ypos, &fpsCamera);
 };
 
 void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
-
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     mouse.left_dwn = true;
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+    mouse.mid_dwn = action == GLFW_PRESS;
   if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     mouse.right_dwn = true;
 }
@@ -27,7 +26,11 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 void mouseInit(Window *w) {
   glfwSetCursorPosCallback(w->inner, mouseUpdatePosFPS);
   glfwSetMouseButtonCallback(w->inner, mouseButtonCallback);
-  glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  mouse.npick = 0;
+  mouse.left_dwn = false;
+  mouse.mid_dwn = false;
+  mouse.right_dwn = false;
+  glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
 }
 
 //

@@ -5,6 +5,8 @@
 /// Read a file's contents to end and store in a freshly-allocated string.
 const char *readFileToEnd(const char *path, int *len);
 
+void levelSanitizePosition(vec3 pos);
+
 typedef struct {
   vec3 origin, dir;
 } Ray;

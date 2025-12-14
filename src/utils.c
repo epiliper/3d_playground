@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include <math.h>
 
 const char *readFileToEnd(const char *path, int *n) {
   FILE *f = fopen(path, "r");
@@ -19,12 +20,19 @@ const char *readFileToEnd(const char *path, int *n) {
   return ret;
 }
 
+#define LEVEL_ADJ_THRES_POS 1.0
+void levelSanitizePosition(vec3 pos) {
+  pos[0] = roundf(pos[0] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  pos[1] = roundf(pos[1] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  pos[2] = roundf(pos[2] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+}
+
 // get a direction in world space from screen coordinates
 void rayDirection(vec3 origin, int screenResX, int screenResY, double cursorX,
                   double cursorY, mat4 view, mat4 projection, vec3 dest) {
 
   vec4 NDC = {
-      2.0f * cursorX / (float)(screenResX - 1.0f),
+      2.0f * cursorX / (float)screenResX - 1.0f,
       1.0f - 2.0f * (cursorY / screenResY),
       -1.0f,
       1.0f,
@@ -48,5 +56,5 @@ void castRay(vec3 origin, vec2 screenRes, vec2 cursorPos, mat4 view,
              mat4 projection, Ray *r) {
   rayDirection(origin, screenRes[0], screenRes[1], cursorPos[0], cursorPos[1],
                view, projection, r->dir);
-  glm_vec3_copy(r->origin, origin);
+  glm_vec3_copy(origin, r->origin);
 }

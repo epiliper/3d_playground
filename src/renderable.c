@@ -5,6 +5,8 @@
 #include "string.h" // memset
 #include "mouse.h"
 #include "app.h"
+#include "camera.h"
+#include <stdbool.h>
 
 int success;
 char infoLog[512];
@@ -57,6 +59,8 @@ void rendererAddItem(void *item, int shape, int tex) {
   RenderInfo rinfo;
   RenderFunc rfunc;
   ModelFunc mfunc;
+  MoveFunc mvfunc;
+  PosFunc pfunc;
 
   switch (shape) {
   case 0: {
@@ -70,6 +74,8 @@ void rendererAddItem(void *item, int shape, int tex) {
     rinfo = renderer.rinfo[0];
     rfunc = (RenderFunc)cubeRender;
     mfunc = (ModelFunc)cubeUpdateModel;
+    mvfunc = (MoveFunc)cubeMove;
+    pfunc = (PosFunc)cubePos;
   }
   }
 
@@ -78,22 +84,67 @@ void rendererAddItem(void *item, int shape, int tex) {
   bucket = shape;
 
   // MAKE THIS INTO A FUNCTION TO AVOID NULL POINTERS!!!!!!!!!!!!!!!!
-  Renderable r = {.data = item, .rfunc = rfunc, .mfunc = mfunc, .rinfo = rinfo};
+  Renderable r = {
+      .data = item,
+      .rfunc = rfunc,
+      .mvfunc = mvfunc,
+      .mfunc = mfunc,
+      .rinfo = rinfo,
+      .pfunc = pfunc,
+  };
+
   renderer.items[renderer.n_items] = r;
   renderer.n_items++;
 }
 
 void rendererDrawAll(RenderPayload renderPayload) {
   Renderable *r;
+  uint32_t picked = 0;
 
   for (int i = 0; i < renderer.n_items; i++) {
     r = &renderer.items[i];
     r->rfunc(r->data, r->rinfo, renderPayload, NULL);
   }
 
+  rendererPickingPhase(&pickingSystem, renderer.items, renderer.n_items,
+                       renderPayload);
+
+  pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
+
+  bool has_pick = pickingGetAsync(&pickingSystem, &picked);
+
+  if (mouse.mid_dwn) {
+    fpsCameraPan(mouse.xpos, mouse.ypos, &fpsCamera);
+  }
+
+  if (mouse.left_dwn) {
+
+    // clear if we already have items selected
+    //
+    // TODO: add shift toggle here to select multiple
+    if (mouse.npick > 0) {
+      mouse.npick = 0;
+    } else {
+      if (has_pick && picked != 0) {
+        mouse.picked[0] = picked - 1;
+        mouse.npick = 1;
+      };
+    }
+
+    mouse.left_dwn = false;
+  }
+
   // case 1: we have an object selected and are moving it.
   if (mouse.npick > 0) {
+    // this entire branch needs to be a function... It's going to get big real
+    // fast
+    Ray ray;
+    castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},
+            (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,
+            *renderPayload.proj, &ray);
+
     for (int i = 0; i < mouse.npick; i++) {
+      vec3 pos;
       r = &renderer.items[mouse.picked[i]];
       RenderMods m = {
           .color = &(vec4){1.0, 0.33, 0.33, 0.22},
@@ -103,32 +154,37 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
       };
 
+      r->pfunc(r->data, pos);
+
+      float distance = glm_vec3_distance(ray.origin, pos);
+
+      vec3 drag_pos;
+      drag_pos[0] = ray.origin[0] + ray.dir[0] * distance;
+      drag_pos[1] = ray.origin[1] + ray.dir[1] * distance;
+      drag_pos[2] = ray.origin[2] + ray.dir[2] * distance;
+
+      levelSanitizePosition(drag_pos);
+      glm_vec3_print(drag_pos, stdout);
+
+      r->mvfunc(r->data, drag_pos);
       r->rfunc(r->data, r->rinfo, renderPayload, &m);
     }
     return;
   }
 
-  // case 2: we are looking for objects to select.
-  if (renderer.track_picking) {
-    uint32_t picked = 0;
-    rendererPickingPhase(&pickingSystem, renderer.items, renderer.n_items,
-                         renderPayload);
+  // case 2: we are actively looking for things to pick
+  if (has_pick && picked != 0) {
+    RenderMods m = {
+        .color = &(vec4){0.33, 0.33, 1.0, 0.22},
+        .scale_x = 1.05,
+        .scale_y = 1.05,
+        .scale_z = 1.05,
 
-    pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
-
-    if (pickingGetAsync(&pickingSystem, &picked) && picked != 0) {
-      RenderMods m = {
-          .color = &(vec4){0.33, 0.33, 1.0, 0.22},
-          .scale_x = 1.05,
-          .scale_y = 1.05,
-          .scale_z = 1.05,
-
-      };
-
-      r = &renderer.items[picked - 1];
-      r->rfunc(r->data, r->rinfo, renderPayload, &m);
     };
-  }
+
+    r = &renderer.items[picked - 1];
+    r->rfunc(r->data, r->rinfo, renderPayload, &m);
+  };
 }
 
 //

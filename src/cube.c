@@ -119,6 +119,14 @@ void cubeUpdateModel(Cube *c, mat4 *dest) {
   *dest[1][1] = c->height;
 }
 
+void cubePos(Cube *c, vec3 pos) {
+  glm_vec3_copy(c->pos, pos);
+}
+
+void cubeMove(Cube *c, vec3 pos) {
+  glm_vec3_copy(pos, c->pos);
+}
+
 void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
   glUseProgram(rinfo.shader);

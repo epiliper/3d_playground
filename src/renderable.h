@@ -26,11 +26,19 @@ typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r,
 // Modify an outside model matrix to represent the object
 typedef void (*ModelFunc)(void *self, mat4 *dest);
 
+// Move to pos
+typedef void (*MoveFunc)(void *self, vec3 pos);
+
+// Get pos coordinates
+typedef void (*PosFunc)(void *self, vec3 dest);
+
 // A wrapper around data that describes how it is rendered.
 typedef struct {
   RenderFunc rfunc;
   ModelFunc mfunc;
+  MoveFunc mvfunc;
   RenderInfo rinfo;
+  PosFunc pfunc;
   void *data;
 } Renderable;
 
