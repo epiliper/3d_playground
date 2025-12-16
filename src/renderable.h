@@ -2,45 +2,7 @@
 #define G_RENDERABLE
 
 #include "cglm/cglm.h"
-
-/// ====================
-/// Renderable INTERFACE
-/// ====================
-
-typedef struct {
-  unsigned int vao, vbo, ebo, shader;
-} RenderInfo;
-
-typedef struct {
-  mat4 *proj, *view;
-} RenderPayload;
-
-typedef struct {
-  vec4 *color;
-  float scale_x, scale_y, scale_z;
-} RenderMods;
-
-typedef void (*RenderFunc)(void *self, RenderInfo rinfo, RenderPayload r,
-                           RenderMods *mods);
-
-// Modify an outside model matrix to represent the object
-typedef void (*ModelFunc)(void *self, mat4 *dest);
-
-// Move to pos
-typedef void (*MoveFunc)(void *self, vec3 pos);
-
-// Get pos coordinates
-typedef void (*PosFunc)(void *self, vec3 dest);
-
-// A wrapper around data that describes how it is rendered.
-typedef struct {
-  RenderFunc rfunc;
-  ModelFunc mfunc;
-  MoveFunc mvfunc;
-  RenderInfo rinfo;
-  PosFunc pfunc;
-  void *data;
-} Renderable;
+#include "entity.h"
 
 // Access RenderFuncs to draw piece of data.
 void renderableDraw(Renderable *r, RenderPayload *context);
@@ -63,11 +25,12 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // rendering functions and info assigned during the loading phase, before
 // anything is rendered.
 typedef struct {
-  RenderInfo *rinfo;
-  Renderable *items;
-  int n_items, n_rinfo;
+  Entity *ents;
+  int n;
   bool track_picking;
 } Renderer;
+
+extern Renderer renderer;
 
 // const int RENDERER_SLOT_EMPTY = 1 << 4;
 #define RENDERER_SLOT_EMPTY 1 >> 4
@@ -121,7 +84,7 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY);
 bool pickingGetAsync(PickingSystem *t, uint32_t *dest);
 
 // draw all renderables to a picking framebuffer.
-void rendererPickingPhase(PickingSystem *t, Renderable *r, int n,
+void rendererPickingPhase(PickingSystem *t, Entity *ents, int n,
                           RenderPayload renderPayload);
 
 #endif

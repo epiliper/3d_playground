@@ -1,15 +1,17 @@
 #include "renderable.h"
 #include "glad.h"
 #include "utils.h"
-#include "cube.h"
 #include "string.h" // memset
 #include "mouse.h"
 #include "app.h"
 #include "camera.h"
 #include <stdbool.h>
+#include "keybindings.h"
 
 int success;
 char infoLog[512];
+
+static float ROT_90_RAD;
 
 //
 // Renderable
@@ -26,87 +28,34 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // Renderer
 //
 
-Renderer renderer = {.items = NULL,
-                     .rinfo = NULL,
-                     .n_items = 0,
-                     .n_rinfo = 0,
-                     .track_picking = true};
+Renderer renderer = {.ents = NULL, .n = 0, .track_picking = true};
 
 const int RENDER_SLOT_EMPTY = 1 << 10;
 
 void rendererInitWithCapacity(int cap) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  ROT_90_RAD = glm_rad(90.0f);
 
-  if (renderer.items != NULL)
-    free(renderer.items);
-  if (renderer.rinfo != NULL)
-    free(renderer.rinfo);
+  if (renderer.ents != NULL)
+    free(renderer.ents);
 
-  renderer.n_items = 0, renderer.n_rinfo = 0;
+  renderer.n = 0;
 
   // TODO: Handle errors here.
-  renderer.items = malloc(sizeof(Renderable) * cap);
-  renderer.rinfo = malloc(sizeof(RenderInfo) * cap);
-
-  for (int i = 0; i < cap; i++) {
-    renderer.rinfo[i].vao = RENDER_SLOT_EMPTY;
-  }
-}
-
-void rendererAddItem(void *item, int shape, int tex) {
-  int bucket = 0;
-  RenderInfo rinfo;
-  RenderFunc rfunc;
-  ModelFunc mfunc;
-  MoveFunc mvfunc;
-  PosFunc pfunc;
-
-  switch (shape) {
-  case 0: {
-    Cube *c = item;
-    if (renderer.rinfo[0].vao == RENDER_SLOT_EMPTY) {
-      rinfo = cubeRenderInit();
-      renderer.rinfo[0] = rinfo;
-      renderer.n_rinfo++;
-    }
-
-    rinfo = renderer.rinfo[0];
-    rfunc = (RenderFunc)cubeRender;
-    mfunc = (ModelFunc)cubeUpdateModel;
-    mvfunc = (MoveFunc)cubeMove;
-    pfunc = (PosFunc)cubePos;
-  }
-  }
-
-  // TODO: handle textures.
-
-  bucket = shape;
-
-  // MAKE THIS INTO A FUNCTION TO AVOID NULL POINTERS!!!!!!!!!!!!!!!!
-  Renderable r = {
-      .data = item,
-      .rfunc = rfunc,
-      .mvfunc = mvfunc,
-      .mfunc = mfunc,
-      .rinfo = rinfo,
-      .pfunc = pfunc,
-  };
-
-  renderer.items[renderer.n_items] = r;
-  renderer.n_items++;
+  renderer.ents = malloc(sizeof(Entity) * cap);
 }
 
 void rendererDrawAll(RenderPayload renderPayload) {
-  Renderable *r;
+  Entity *e;
   uint32_t picked = 0;
 
-  for (int i = 0; i < renderer.n_items; i++) {
-    r = &renderer.items[i];
-    r->rfunc(r->data, r->rinfo, renderPayload, NULL);
+  for (int i = 0; i < renderer.n; i++) {
+    e = &renderer.ents[i];
+    e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, NULL);
   }
 
-  rendererPickingPhase(&pickingSystem, renderer.items, renderer.n_items,
+  rendererPickingPhase(&pickingSystem, renderer.ents, renderer.n,
                        renderPayload);
 
   pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
@@ -136,6 +85,13 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
   // case 1: we have an object selected and are moving it.
   if (mouse.npick > 0) {
+    vec3 rotate = {0};
+
+    if (KBTN_DOWN(E_EDIT_ROTATE)) {
+      glm_vec3_copy((vec3){ROT_90_RAD}, rotate);
+      KBTN_RELEASE(E_EDIT_ROTATE);
+    }
+
     // this entire branch needs to be a function... It's going to get big real
     // fast
     Ray ray;
@@ -145,7 +101,7 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
     for (int i = 0; i < mouse.npick; i++) {
       vec3 pos;
-      r = &renderer.items[mouse.picked[i]];
+      e = &renderer.ents[mouse.picked[i]];
       RenderMods m = {
           .color = &(vec4){1.0, 0.33, 0.33, 0.22},
           .scale_x = 1.05,
@@ -154,7 +110,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
       };
 
-      r->pfunc(r->data, pos);
+      glm_vec3_copy(e->loc.pos, pos);
+      glm_vec3_add(e->loc.rot, rotate, e->loc.rot);
 
       float distance = glm_vec3_distance(ray.origin, pos);
 
@@ -164,10 +121,9 @@ void rendererDrawAll(RenderPayload renderPayload) {
       drag_pos[2] = ray.origin[2] + ray.dir[2] * distance;
 
       levelSanitizePosition(drag_pos);
-      glm_vec3_print(drag_pos, stdout);
 
-      r->mvfunc(r->data, drag_pos);
-      r->rfunc(r->data, r->rinfo, renderPayload, &m);
+      glm_vec3_copy(drag_pos, e->loc.pos);
+      e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
     }
     return;
   }
@@ -182,8 +138,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
     };
 
-    r = &renderer.items[picked - 1];
-    r->rfunc(r->data, r->rinfo, renderPayload, &m);
+    e = &renderer.ents[picked - 1];
+    e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
   };
 }
 
@@ -425,22 +381,22 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void rendererPickingPhase(PickingSystem *t, Renderable *r, int n,
+void rendererPickingPhase(PickingSystem *t, Entity *ents, int n,
                           RenderPayload renderPayload) {
   glBindFramebuffer(GL_FRAMEBUFFER, t->fbo);
   glUseProgram(t->shader);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  Renderable *item;
+  Entity *e;
   RenderInfo rinfo;
 
   for (int i = 0; i < n; i++) {
     shaderSetUnsignedInt(t->shader, "objectIndex", i + 1);
-    item = &r[i];
-    rinfo = item->rinfo;
+    e = &ents[i];
+    rinfo = e->render.rinfo;
     rinfo.shader = t->shader;
 
-    item->rfunc(item->data, rinfo, renderPayload, NULL);
+    e->render.rfunc(e->data, &e->loc, rinfo, renderPayload, NULL);
   }
 
   // reset

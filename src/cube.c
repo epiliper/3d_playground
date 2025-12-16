@@ -111,44 +111,27 @@ RenderInfo cubeRenderInit() {
 
 }
 
-void cubeUpdateModel(Cube *c, mat4 *dest) {
-  glm_mat4_identity(*dest);
-  glm_translate(*dest, c->pos);
 
-  *dest[0][0] = c->width;
-  *dest[1][1] = c->height;
-}
-
-void cubePos(Cube *c, vec3 pos) {
-  glm_vec3_copy(c->pos, pos);
-}
-
-void cubeMove(Cube *c, vec3 pos) {
-  glm_vec3_copy(pos, c->pos);
-}
-
-void cubeRender(Cube *c, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
+void cubeRender(Cube *c, Body *body, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
   glUseProgram(rinfo.shader);
 
   float scale_x = mods != NULL ? mods->scale_x : 1.0;
-  float scale_y = mods != NULL ? mods->scale_x : 1.0;
+  float scale_y = mods != NULL ? mods->scale_y : 1.0;
   float scale_z = mods != NULL ? mods->scale_z : 1.0;
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);
-  shaderSetVec3(rinfo.shader, "pos", c->pos);
+  shaderSetVec3(rinfo.shader, "pos", body->pos);
 
 
   mat4 model;
   glm_mat4_identity(model);
-  glm_translate(model, c->pos); // move to pos
 
-  // apply length/width
-  model[0][0] = c->width * scale_x;
-  model[1][1] = c->height * scale_y;
-  model[2][2] *= scale_z;
-
+  glm_translate(model, body->pos); // move to pos
+  glm_rotate(model, body->rot[0], (vec3){0, 1, 0});
+  glm_scale(model, (vec3){ body->width * scale_x, body->height * scale_y, scale_z});
+  
   shaderSetMat4(rinfo.shader, "model", model);
 
   if (mods != NULL && mods->color != NULL) {

@@ -48,6 +48,9 @@ static const int K_INV = GLFW_KEY_I;
 static const int K_PAUSE = GLFW_KEY_ESCAPE;
 static const int K_CAM_ISO = GLFW_KEY_Q;
 
+// editor
+static const int K_EDIT_ROTATE = GLFW_KEY_R;
+
 void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
                                   int action, int mods) {
   for (int i = 0; i < playerBindings.callbacks.n; i++) {
@@ -78,6 +81,7 @@ void playerBindingsSetDefault(PlayerBindings *p) {
   KSET_BIND(p, P_PAUSE, K_PAUSE);
 
   KSET_BIND_CALLBACK(p, P_ISO_TOGGLE, K_CAM_ISO);
+  KSET_BIND_CALLBACK(p, E_EDIT_ROTATE, K_EDIT_ROTATE);
 }
 
 // TODO: update this to detect key collision logic.

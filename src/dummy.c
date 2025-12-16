@@ -5,18 +5,21 @@
 #include "cube.h"
 #include "renderable.h"
 #include "app.h"
+#include "entity.h"
 
 Cube testCube = {
-    .pos = {0, 0, -5},
     .color = {1, 1, 0, 1.0},
-    .height = 5,
-    .width = 10,
 };
 
 void testScenePrepare() {
   rendererInitWithCapacity(1);
   pickingSystemInit(APP.window.resX, APP.window.resY);
-  rendererAddItem(&testCube, 0, 0);
+  entityLoadFromData(
+      &testCube, ENT_CUBE,
+      (Body){.pos = {0, 0, -5}, .rot = {0, 0, 0}, .height = 5, .width = 10},
+      &renderer.ents[0]);
+  renderer.n = 1;
+  // rendererAddItem(&testCube, 0, 0);
 
   glEnable(GL_DEPTH_TEST);
 }
