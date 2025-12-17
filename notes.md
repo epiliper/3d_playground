@@ -25,5 +25,8 @@ The event loop will have these two modes as their own loops.
 
 need to look at [archive of ourmachinery](https://ruby0x1.github.io/machinery_blog_archive/) to get ideas for how to implement object picking/rotation.
 
+# 2025-Dec-16
 
+I need to use a hashtable to track which textures and models we've already loaded.
+I also need to rework the font system to not buffer every single character to the GPU each time we want to render text. That's just plain bad.
 

@@ -30,6 +30,13 @@ typedef struct {
   bool track_picking;
 } Renderer;
 
+typedef struct {
+} RenderInfoManager;
+
+typedef struct {
+
+} TextureManager;
+
 extern Renderer renderer;
 
 // const int RENDERER_SLOT_EMPTY = 1 << 4;

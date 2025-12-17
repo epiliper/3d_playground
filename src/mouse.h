@@ -10,7 +10,8 @@
 typedef struct {
   double xpos, ypos;
   double lastx, lasty;
-  bool left_dwn, right_dwn, mid_dwn;
+  double rotatex, rotatey;
+  bool left_dwn, right_dwn, mid_dwn, moved, rotating;
   float NDC[2];
   int picked[MOUSE_MAX_PICK];
   int npick;

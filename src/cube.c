@@ -2,42 +2,75 @@
 #include "glad.h"
 
 // clang-format off
-float CUBE_VERTICES[72] = {
+// x     y     z     tex_x tex_y
+float CUBE_VERTICES[120] = {
   // front (z = 0.5)
-  -0.5, -0.5,  0.5,  // 0
-   0.5, -0.5,  0.5,  // 1
-   0.5,  0.5,  0.5,  // 2
-  -0.5,  0.5,  0.5,  // 3
+  -0.5, -0.5,  0.5,   1.0f, 1.0f,  // 0
+   0.5, -0.5,  0.5,   1.0f, 0.0f,  // 1
+   0.5,  0.5,  0.5,   0.0f, 0.0f,  // 2
+  -0.5,  0.5,  0.5,   0.0f, 1.0f,  // 3
   
   // back (z = -0.5)
-  -0.5, -0.5, -0.5,  // 4
-   0.5, -0.5, -0.5,  // 5
-   0.5,  0.5, -0.5,  // 6
-  -0.5,  0.5, -0.5,  // 7
+  -0.5, -0.5, -0.5,   1.0f, 1.0f,  // 4
+   0.5, -0.5, -0.5,   1.0f, 0.0f,  // 5
+   0.5,  0.5, -0.5,   0.0f, 0.0f,  // 6
+  -0.5,  0.5, -0.5,   0.0f, 1.0f,  // 7
   
   // left (x = -0.5)
-  -0.5, -0.5, -0.5,  // 8
-  -0.5, -0.5,  0.5,  // 9
-  -0.5,  0.5,  0.5,  // 10
-  -0.5,  0.5, -0.5,  // 11
+  -0.5, -0.5, -0.5,   1.0f, 1.0f,  // 8
+  -0.5, -0.5,  0.5,   1.0f, 0.0f,  // 9
+  -0.5,  0.5,  0.5,   0.0f, 0.0f,  // 10
+  -0.5,  0.5, -0.5,   0.0f, 1.0f,  // 11
   
   // right (x = 0.5)
-   0.5, -0.5, -0.5,  // 12
-   0.5, -0.5,  0.5,  // 13
-   0.5,  0.5,  0.5,  // 14
-   0.5,  0.5, -0.5,  // 15
+   0.5, -0.5, -0.5,   1.0f, 1.0f,  // 12
+   0.5, -0.5,  0.5,   1.0f, 0.0f,  // 13
+   0.5,  0.5,  0.5,   0.0f, 0.0f,  // 14
+   0.5,  0.5, -0.5,   0.0f, 1.0f,  // 15
   
   // top (y = 0.5)
-  -0.5,  0.5,  0.5,  // 16
-   0.5,  0.5,  0.5,  // 17
-   0.5,  0.5, -0.5,  // 18
-  -0.5,  0.5, -0.5,  // 19
+  -0.5,  0.5,  0.5,   1.0f, 1.0f, // 16
+   0.5,  0.5,  0.5,   1.0f, 0.0f, // 17
+   0.5,  0.5, -0.5,   0.0f, 0.0f, // 18
+  -0.5,  0.5, -0.5,   0.0f, 1.0f, // 19
   
   // bottom (y = -0.5)
-  -0.5, -0.5,  0.5,  // 20
-   0.5, -0.5,  0.5,  // 21
-   0.5, -0.5, -0.5,  // 22
-  -0.5, -0.5, -0.5,  // 23
+  -0.5, -0.5,  0.5,   1.0f, 1.0f, // 20
+   0.5, -0.5,  0.5,   1.0f, 0.0f, // 21
+   0.5, -0.5, -0.5,   0.0f, 0.0f, // 22
+  -0.5, -0.5, -0.5,   0.0f, 1.0f, // 23
+};
+
+float CUBE_TEX[48] = {
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
+
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
+
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
+
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
+
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
+
+  1.0f, 1.0f,
+  1.0f, 0.0f,
+  0.0f, 0.0f, 
+  0.0f, 1.0f,
 };
 
 unsigned int CUBE_INDICES[36] = {
@@ -100,17 +133,17 @@ RenderInfo cubeRenderInit() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE_VERTICES), CUBE_VERTICES,
                GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   shader = shaderFromCharVF(cubeVert, cubeFrag);
 
   RenderInfo ret = {.vao = vao, .vbo = vbo, .ebo = ebo, .shader = shader};
   return ret;
-
 }
-
 
 void cubeRender(Cube *c, Body *body, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
@@ -129,7 +162,7 @@ void cubeRender(Cube *c, Body *body, RenderInfo rinfo, RenderPayload r, RenderMo
   glm_mat4_identity(model);
 
   glm_translate(model, body->pos); // move to pos
-  glm_rotate(model, body->rot[0], (vec3){0, 1, 0});
+  glm_rotate(model, glm_rad(body->rot[0]), (vec3){0, 1, 0});
   glm_scale(model, (vec3){ body->width * scale_x, body->height * scale_y, scale_z});
   
   shaderSetMat4(rinfo.shader, "model", model);

@@ -12,6 +12,7 @@ int success;
 char infoLog[512];
 
 static float ROT_90_RAD;
+vec3 obj_rot_start;
 
 //
 // Renderable
@@ -35,7 +36,7 @@ const int RENDER_SLOT_EMPTY = 1 << 10;
 void rendererInitWithCapacity(int cap) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  ROT_90_RAD = glm_rad(90.0f);
+  ROT_90_RAD = glm_rad(15.0f);
 
   if (renderer.ents != NULL)
     free(renderer.ents);
@@ -86,10 +87,32 @@ void rendererDrawAll(RenderPayload renderPayload) {
   // case 1: we have an object selected and are moving it.
   if (mouse.npick > 0) {
     vec3 rotate = {0};
+    bool just_rotated = false;
 
-    if (KBTN_DOWN(E_EDIT_ROTATE)) {
-      glm_vec3_copy((vec3){ROT_90_RAD}, rotate);
-      KBTN_RELEASE(E_EDIT_ROTATE);
+    // just started rotating
+    if (KBTN_DOWN(E_EDIT_ROTATE) && !mouse.rotating) {
+      mouse.rotating = true;
+      mouse.rotatex = mouse.xpos;
+      mouse.rotatey = mouse.ypos;
+      just_rotated = true;
+
+      // still rotating
+    } else if (mouse.rotating) {
+
+      float change_y = (mouse.ypos - mouse.rotatey) / APP.window.resY * 360 * 2;
+      float change_x = (mouse.xpos - mouse.rotatex) / APP.window.resX * 360 * 2;
+
+      change_x = CLAMP_TO_MULTIPLE(change_x, 30.0f);
+      change_y = CLAMP_TO_MULTIPLE(change_y, 30.0f);
+
+      just_rotated = false;
+      glm_vec3_copy((vec3){change_x, change_y}, rotate);
+
+      // we just released the rotate button, so calculate the mouse offset from
+      // the start of the rotation
+      if (!KBTN_DOWN(E_EDIT_ROTATE)) {
+        mouse.rotating = false;
+      }
     }
 
     // this entire branch needs to be a function... It's going to get big real
@@ -99,6 +122,7 @@ void rendererDrawAll(RenderPayload renderPayload) {
             (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,
             *renderPayload.proj, &ray);
 
+    Body b;
     for (int i = 0; i < mouse.npick; i++) {
       vec3 pos;
       e = &renderer.ents[mouse.picked[i]];
@@ -111,18 +135,25 @@ void rendererDrawAll(RenderPayload renderPayload) {
       };
 
       glm_vec3_copy(e->loc.pos, pos);
-      glm_vec3_add(e->loc.rot, rotate, e->loc.rot);
 
-      float distance = glm_vec3_distance(ray.origin, pos);
+      if (mouse.rotating) {
+        if (just_rotated)
+          glm_vec3_copy(e->loc.rot, obj_rot_start);
 
-      vec3 drag_pos;
-      drag_pos[0] = ray.origin[0] + ray.dir[0] * distance;
-      drag_pos[1] = ray.origin[1] + ray.dir[1] * distance;
-      drag_pos[2] = ray.origin[2] + ray.dir[2] * distance;
+        glm_vec3_add(obj_rot_start, rotate, e->loc.rot);
+      } else {
 
-      levelSanitizePosition(drag_pos);
+        float distance = glm_vec3_distance(ray.origin, pos);
 
-      glm_vec3_copy(drag_pos, e->loc.pos);
+        vec3 drag_pos;
+        drag_pos[0] = ray.origin[0] + ray.dir[0] * distance;
+        drag_pos[1] = ray.origin[1] + ray.dir[1] * distance;
+        drag_pos[2] = ray.origin[2] + ray.dir[2] * distance;
+
+        levelSanitizePosition(drag_pos);
+
+        glm_vec3_copy(drag_pos, e->loc.pos);
+      }
       e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
     }
     return;
@@ -259,9 +290,9 @@ void shaderSetUnsignedInt(unsigned int shader, const char *uni,
 /// PICKING
 ///
 ///
-/// Using OGLDev's approach: write to a texture in a second framebuffer, read it
-/// during rendering the primary buffer to see if our mouse position overlaps
-/// with an object index written to the buffer.
+/// Using OGLDev's approach: write to a texture in a second framebuffer, read
+/// it during rendering the primary buffer to see if our mouse position
+/// overlaps with an object index written to the buffer.
 
 // Shaders for painting a buffer with object IDs.
 

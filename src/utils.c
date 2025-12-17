@@ -22,9 +22,12 @@ const char *readFileToEnd(const char *path, int *n) {
 
 #define LEVEL_ADJ_THRES_POS 1.0
 void levelSanitizePosition(vec3 pos) {
-  pos[0] = roundf(pos[0] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
-  pos[1] = roundf(pos[1] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
-  pos[2] = roundf(pos[2] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  // pos[0] = roundf(pos[0] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  // pos[1] = roundf(pos[1] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  // pos[2] = roundf(pos[2] / LEVEL_ADJ_THRES_POS) * LEVEL_ADJ_THRES_POS;
+  pos[0] = CLAMP_TO_MULTIPLE(pos[0], LEVEL_ADJ_THRES_POS);
+  pos[1] = CLAMP_TO_MULTIPLE(pos[1], LEVEL_ADJ_THRES_POS);
+  pos[2] = CLAMP_TO_MULTIPLE(pos[2], LEVEL_ADJ_THRES_POS);
 }
 
 // get a direction in world space from screen coordinates

@@ -11,6 +11,7 @@ void mouseUpdatePosFPS(GLFWwindow *window, double xpos, double ypos) {
   mouse.lasty = mouse.ypos;
   mouse.xpos = xpos;
   mouse.ypos = ypos;
+  mouse.moved = true;
   // fpsCameraPan(xpos, ypos, &fpsCamera);
 };
 
@@ -30,6 +31,8 @@ void mouseInit(Window *w) {
   mouse.left_dwn = false;
   mouse.mid_dwn = false;
   mouse.right_dwn = false;
+  mouse.moved = false;
+  mouse.rotating = false;
   glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
 }
 
