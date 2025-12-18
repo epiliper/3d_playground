@@ -71,6 +71,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
   if (mouse.mid_dwn) {
     fpsCameraPan(mouse.xpos, mouse.ypos, &fpsCamera);
+  } else {
+    fpsCamera.firstmouse = true;
   }
 
   if (mouse.left_dwn) {
@@ -115,7 +117,7 @@ void rendererDrawAll(RenderPayload renderPayload) {
       change_y = CLAMP_TO_MULTIPLE(change_y, 30.0f);
 
       just_rotated = false;
-      glm_vec3_copy((vec3){change_x, change_y}, rotate);
+      glm_vec3_copy((vec3){change_x, change_y, 0}, rotate);
 
       // we just released the rotate button, so calculate the mouse offset from
       // the start of the rotation
@@ -143,7 +145,7 @@ void rendererDrawAll(RenderPayload renderPayload) {
       change_y = -CLAMP_TO_MULTIPLE(change_y, 1.0f);
 
       just_scaled = false;
-      glm_vec3_copy((vec3){change_x, change_y}, scale);
+      glm_vec3_copy((vec3){change_x, change_y, 0}, scale);
 
       // we just released the rotate button, so calculate the mouse offset from
       // the start of the rotation
