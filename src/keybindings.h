@@ -16,6 +16,7 @@ typedef enum {
   P_PAUSE,
   P_ISO_TOGGLE,
   E_EDIT_ROTATE,
+  E_EDIT_SCALE,
   N_PLAYER_BINDINGS
 } PlayerBinding;
 

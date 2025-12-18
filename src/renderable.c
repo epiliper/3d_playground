@@ -14,6 +14,12 @@ char infoLog[512];
 static float ROT_90_RAD;
 vec3 obj_rot_start;
 
+bool rotating;
+bool just_rotated;
+
+bool scaling;
+bool just_scaled;
+
 //
 // Renderable
 //
@@ -87,17 +93,20 @@ void rendererDrawAll(RenderPayload renderPayload) {
   // case 1: we have an object selected and are moving it.
   if (mouse.npick > 0) {
     vec3 rotate = {0};
+    vec3 scale = {0};
+
+    bool just_scaled = false;
     bool just_rotated = false;
 
     // just started rotating
-    if (KBTN_DOWN(E_EDIT_ROTATE) && !mouse.rotating) {
-      mouse.rotating = true;
+    if (KBTN_DOWN(E_EDIT_ROTATE) && !rotating) {
+      rotating = true;
       mouse.rotatex = mouse.xpos;
       mouse.rotatey = mouse.ypos;
       just_rotated = true;
 
       // still rotating
-    } else if (mouse.rotating) {
+    } else if (rotating) {
 
       float change_y = (mouse.ypos - mouse.rotatey) / APP.window.resY * 360 * 2;
       float change_x = (mouse.xpos - mouse.rotatex) / APP.window.resX * 360 * 2;
@@ -111,7 +120,35 @@ void rendererDrawAll(RenderPayload renderPayload) {
       // we just released the rotate button, so calculate the mouse offset from
       // the start of the rotation
       if (!KBTN_DOWN(E_EDIT_ROTATE)) {
-        mouse.rotating = false;
+        rotating = false;
+      }
+    }
+
+    // just started rotating
+    if (KBTN_DOWN(E_EDIT_SCALE) && !scaling) {
+      scaling = true;
+      mouse.rotatex = mouse.xpos;
+      mouse.rotatey = mouse.ypos;
+      just_scaled = true;
+
+      // still scaling
+    } else if (scaling) {
+
+      float change_y =
+          (mouse.ypos - mouse.rotatey) / APP.window.resY * 100 * 0.3;
+      float change_x =
+          (mouse.xpos - mouse.rotatex) / APP.window.resX * 100 * 0.3;
+
+      change_x = -CLAMP_TO_MULTIPLE(change_x, 1.0f);
+      change_y = -CLAMP_TO_MULTIPLE(change_y, 1.0f);
+
+      just_scaled = false;
+      glm_vec3_copy((vec3){change_x, change_y}, scale);
+
+      // we just released the rotate button, so calculate the mouse offset from
+      // the start of the rotation
+      if (!KBTN_DOWN(E_EDIT_SCALE)) {
+        scaling = false;
       }
     }
 
@@ -136,11 +173,19 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
       glm_vec3_copy(e->loc.pos, pos);
 
-      if (mouse.rotating) {
+      if (rotating) {
         if (just_rotated)
           glm_vec3_copy(e->loc.rot, obj_rot_start);
 
         glm_vec3_add(obj_rot_start, rotate, e->loc.rot);
+      } else if (scaling) {
+        if (just_scaled) {
+          obj_rot_start[0] = e->loc.width;
+          obj_rot_start[1] = e->loc.height;
+        }
+
+        e->loc.width = obj_rot_start[0] + scale[0];
+        e->loc.height = obj_rot_start[1] + scale[1];
       } else {
 
         float distance = glm_vec3_distance(ray.origin, pos);
