@@ -76,7 +76,6 @@ void rendererDrawAll(RenderPayload renderPayload) {
   }
 
   if (mouse.left_dwn) {
-
     // clear if we already have items selected
     //
     // TODO: add shift toggle here to select multiple

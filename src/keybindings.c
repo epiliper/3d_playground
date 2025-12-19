@@ -82,8 +82,8 @@ void playerBindingsSetDefault(PlayerBindings *p) {
   KSET_BIND(p, P_PAUSE, K_PAUSE);
 
   KSET_BIND_CALLBACK(p, P_ISO_TOGGLE, K_CAM_ISO);
-  KSET_BIND_CALLBACK(p, E_EDIT_ROTATE, K_EDIT_ROTATE);
-  KSET_BIND_CALLBACK(p, E_EDIT_SCALE, K_EDIT_SCALE);
+  KSET_BIND(p, E_EDIT_ROTATE, K_EDIT_ROTATE);
+  KSET_BIND(p, E_EDIT_SCALE, K_EDIT_SCALE);
 }
 
 // TODO: update this to detect key collision logic.
