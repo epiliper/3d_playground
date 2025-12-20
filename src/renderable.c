@@ -44,13 +44,15 @@ void rendererInitWithCapacity(int cap) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   ROT_90_RAD = glm_rad(15.0f);
 
-  if (renderer.ents != NULL)
-    free(renderer.ents);
+  if (renderer.ents.len != 0) {
+    DynArrayDestroy(&renderer.ents);
+  }
 
   renderer.n = 0;
 
   // TODO: Handle errors here.
-  renderer.ents = malloc(sizeof(Entity) * cap);
+  // renderer.ents = malloc(sizeof(Entity) * cap);
+  DynArrayInit(&renderer.ents, cap, Entity);
 }
 
 void rendererDrawAll(RenderPayload renderPayload) {
@@ -58,11 +60,12 @@ void rendererDrawAll(RenderPayload renderPayload) {
   uint32_t picked = 0;
 
   for (int i = 0; i < renderer.n; i++) {
-    e = &renderer.ents[i];
+    // e = &renderer.ents[i];
+    DynArrayGet(&renderer.ents, i, &e);
     e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, NULL);
   }
 
-  rendererPickingPhase(&pickingSystem, renderer.ents, renderer.n,
+  rendererPickingPhase(&pickingSystem, &renderer.ents, renderer.n,
                        renderPayload);
 
   pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
@@ -163,7 +166,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
     Body b;
     for (int i = 0; i < mouse.npick; i++) {
       vec3 pos;
-      e = &renderer.ents[mouse.picked[i]];
+      // e = &renderer.ents[mouse.picked[i]];
+      DynArrayGet(&renderer.ents, i, &e);
       RenderMods m = {
           .color = &(vec4){1.0, 0.33, 0.33, 0.22},
           .scale_x = 1.05,
@@ -215,7 +219,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
     };
 
-    e = &renderer.ents[picked - 1];
+    DynArrayGet(&renderer.ents, picked - 1, &e);
+    // e = &renderer.ents[picked - 1];
     e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
   };
 }
@@ -458,7 +463,7 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void rendererPickingPhase(PickingSystem *t, Entity *ents, int n,
+void rendererPickingPhase(PickingSystem *t, DynArray *ents, int n,
                           RenderPayload renderPayload) {
   glBindFramebuffer(GL_FRAMEBUFFER, t->fbo);
   glUseProgram(t->shader);
@@ -469,7 +474,8 @@ void rendererPickingPhase(PickingSystem *t, Entity *ents, int n,
 
   for (int i = 0; i < n; i++) {
     shaderSetUnsignedInt(t->shader, "objectIndex", i + 1);
-    e = &ents[i];
+    DynArrayGet(ents, i, &e);
+    // e = &ents[i];
     rinfo = e->render.rinfo;
     rinfo.shader = t->shader;
 

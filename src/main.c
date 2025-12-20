@@ -1,7 +1,8 @@
 #include "app.h"
+#include "dynarray.h"
 
 int main() {
   applicationStart();
   applicationRun();
-  return 0;
+  // DynArrayTest();
 }

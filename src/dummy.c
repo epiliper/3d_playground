@@ -14,10 +14,12 @@ Cube testCube = {
 void testScenePrepare() {
   rendererInitWithCapacity(1);
   pickingSystemInit(APP.window.resX, APP.window.resY);
+  Entity e;
   entityLoadFromData(
       &testCube, ENT_CUBE,
       (Body){.pos = {0, 0, -5}, .rot = {0, 0, 0}, .height = 5, .width = 10},
-      &renderer.ents[0]);
+      &e);
+  DynArrayAdd(&renderer.ents, &e);
   renderer.n = 1;
   // rendererAddItem(&testCube, 0, 0);
 

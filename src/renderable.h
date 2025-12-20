@@ -3,6 +3,7 @@
 
 #include "cglm/cglm.h"
 #include "entity.h"
+#include "dynarray.h"
 
 // Access RenderFuncs to draw piece of data.
 void renderableDraw(Renderable *r, RenderPayload *context);
@@ -25,7 +26,7 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // rendering functions and info assigned during the loading phase, before
 // anything is rendered.
 typedef struct {
-  Entity *ents;
+  DynArray ents;
   int n;
   bool track_picking;
 } Renderer;
@@ -91,7 +92,7 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY);
 bool pickingGetAsync(PickingSystem *t, uint32_t *dest);
 
 // draw all renderables to a picking framebuffer.
-void rendererPickingPhase(PickingSystem *t, Entity *ents, int n,
+void rendererPickingPhase(PickingSystem *t, DynArray *ents, int n,
                           RenderPayload renderPayload);
 
 #endif
