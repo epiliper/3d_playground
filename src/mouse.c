@@ -27,7 +27,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 void mouseInit(Window *w) {
   glfwSetCursorPosCallback(w->inner, mouseUpdatePosFPS);
   glfwSetMouseButtonCallback(w->inner, mouseButtonCallback);
-  mouse.npick = 0;
+  DynArrayInit(&mouse.picked, MOUSE_MAX_PICK, int);
   mouse.left_dwn = false;
   mouse.mid_dwn = false;
   mouse.right_dwn = false;

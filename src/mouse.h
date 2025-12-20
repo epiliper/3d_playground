@@ -1,6 +1,7 @@
 #ifndef G_MOUSE
 #define G_MOUSE
 
+#include "dynarray.h"
 #include "window.h"
 #include "cglm/cglm.h"
 
@@ -13,8 +14,7 @@ typedef struct {
   double rotatex, rotatey;
   bool left_dwn, right_dwn, mid_dwn, moved, rotating;
   float NDC[2];
-  int picked[MOUSE_MAX_PICK];
-  int npick;
+  DynArray picked;
 } Mouse;
 
 typedef struct {

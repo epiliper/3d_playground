@@ -27,7 +27,6 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // anything is rendered.
 typedef struct {
   DynArray ents;
-  int n;
   bool track_picking;
 } Renderer;
 
@@ -92,7 +91,7 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY);
 bool pickingGetAsync(PickingSystem *t, uint32_t *dest);
 
 // draw all renderables to a picking framebuffer.
-void rendererPickingPhase(PickingSystem *t, DynArray *ents, int n,
+void rendererPickingPhase(PickingSystem *t, DynArray *ents,
                           RenderPayload renderPayload);
 
 #endif

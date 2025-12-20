@@ -20,7 +20,6 @@ void testScenePrepare() {
       (Body){.pos = {0, 0, -5}, .rot = {0, 0, 0}, .height = 5, .width = 10},
       &e);
   DynArrayAdd(&renderer.ents, &e);
-  renderer.n = 1;
   // rendererAddItem(&testCube, 0, 0);
 
   glEnable(GL_DEPTH_TEST);

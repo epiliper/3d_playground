@@ -30,6 +30,7 @@ void DynArrayAdd(DynArray *d, void *item) {
 void _DynArrayGet(DynArray *d, int idx, void **dest) {
   if (idx >= d->len) {
     *dest = NULL;
+    return;
   }
 
   *dest = &d->data[idx * d->stride];
@@ -55,6 +56,8 @@ void DynArraySwapRemove(DynArray *d, int idx, void *dest) {
          d->stride);
   d->len--;
 }
+
+void DynArrayClear(DynArray *d) { d->len = 0; }
 
 void DynArrayDestroy(DynArray *d) {
   // TODO: store destructor func for items that need them.

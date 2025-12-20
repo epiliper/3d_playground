@@ -33,7 +33,6 @@ typedef void (*RenderFunc)(void *self, Body *body, RenderInfo rinfo,
 typedef struct {
   RenderFunc rfunc;
   RenderInfo rinfo;
-  void *data;
 } Renderable;
 
 typedef enum {

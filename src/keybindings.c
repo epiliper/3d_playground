@@ -48,9 +48,14 @@ static const int K_INV = GLFW_KEY_I;
 static const int K_PAUSE = GLFW_KEY_ESCAPE;
 static const int K_CAM_ISO = GLFW_KEY_Q;
 
+// modifiers, should never be changed
+static const int K_SHIFT = GLFW_KEY_LEFT_SHIFT;
+static const int K_CTRL = GLFW_KEY_LEFT_CONTROL;
+
 // editor
 static const int K_EDIT_ROTATE = GLFW_KEY_R;
 static const int K_EDIT_SCALE = GLFW_KEY_X;
+static const int K_EDIT_COPY = GLFW_KEY_C;
 
 void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
                                   int action, int mods) {
@@ -80,6 +85,11 @@ void playerBindingsSetDefault(PlayerBindings *p) {
 
   KSET_BIND(p, P_INV, K_INV);
   KSET_BIND(p, P_PAUSE, K_PAUSE);
+
+  KSET_BIND_CALLBACK(p, C_SHIFT, K_SHIFT);
+  KSET_BIND(p, C_CONTROL, K_CTRL);
+
+  KSET_BIND_CALLBACK(p, E_EDIT_COPY, K_EDIT_COPY);
 
   KSET_BIND_CALLBACK(p, P_ISO_TOGGLE, K_CAM_ISO);
   KSET_BIND(p, E_EDIT_ROTATE, K_EDIT_ROTATE);

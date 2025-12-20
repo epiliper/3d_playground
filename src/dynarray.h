@@ -16,11 +16,12 @@ typedef struct {
 #define DynArrayInit(dest, init_cap, type)                                     \
   _DynArrayInit(dest, init_cap, sizeof(type))
 
-#define DynArrayGet(dest, init_cap, single_ptr)                                \
-  _DynArrayGet(dest, init_cap, (void **)single_ptr)
+#define DynArrayGet(arr, idx, single_ptr)                                      \
+  _DynArrayGet(arr, idx, (void **)single_ptr)
 
 void _DynArrayInit(DynArray *d, int cap, int stride);
 void DynArrayGrow(DynArray *d);
+void DynArrayClear(DynArray *d);
 void DynArrayAdd(DynArray *d, void *item);
 void _DynArrayGet(DynArray(*d), int idx, void **dest);
 void DynArraySwapRemove(DynArray *d, int idx, void *dest);

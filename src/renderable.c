@@ -20,6 +20,9 @@ bool just_rotated;
 bool scaling;
 bool just_scaled;
 
+bool copy;
+int to_copy;
+
 //
 // Renderable
 //
@@ -35,7 +38,7 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // Renderer
 //
 
-Renderer renderer = {.ents = NULL, .n = 0, .track_picking = true};
+Renderer renderer = {.ents = {0}, .track_picking = true};
 
 const int RENDER_SLOT_EMPTY = 1 << 10;
 
@@ -48,8 +51,6 @@ void rendererInitWithCapacity(int cap) {
     DynArrayDestroy(&renderer.ents);
   }
 
-  renderer.n = 0;
-
   // TODO: Handle errors here.
   // renderer.ents = malloc(sizeof(Entity) * cap);
   DynArrayInit(&renderer.ents, cap, Entity);
@@ -59,14 +60,12 @@ void rendererDrawAll(RenderPayload renderPayload) {
   Entity *e;
   uint32_t picked = 0;
 
-  for (int i = 0; i < renderer.n; i++) {
-    // e = &renderer.ents[i];
+  for (int i = 0; i < renderer.ents.len; i++) {
     DynArrayGet(&renderer.ents, i, &e);
     e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, NULL);
   }
 
-  rendererPickingPhase(&pickingSystem, &renderer.ents, renderer.n,
-                       renderPayload);
+  rendererPickingPhase(&pickingSystem, &renderer.ents, renderPayload);
 
   pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
 
@@ -82,12 +81,12 @@ void rendererDrawAll(RenderPayload renderPayload) {
     // clear if we already have items selected
     //
     // TODO: add shift toggle here to select multiple
-    if (mouse.npick > 0) {
-      mouse.npick = 0;
+    if (mouse.picked.len > 0) {
+      DynArrayClear(&mouse.picked);
     } else {
       if (has_pick && picked != 0) {
-        mouse.picked[0] = picked - 1;
-        mouse.npick = 1;
+        int id = picked - 1;
+        DynArrayAdd(&mouse.picked, &id);
       };
     }
 
@@ -95,7 +94,7 @@ void rendererDrawAll(RenderPayload renderPayload) {
   }
 
   // case 1: we have an object selected and are moving it.
-  if (mouse.npick > 0) {
+  if (mouse.picked.len > 0) {
     vec3 rotate = {0};
     vec3 scale = {0};
 
@@ -164,10 +163,19 @@ void rendererDrawAll(RenderPayload renderPayload) {
             *renderPayload.proj, &ray);
 
     Body b;
-    for (int i = 0; i < mouse.npick; i++) {
+    for (int i = 0; i < mouse.picked.len; i++) {
       vec3 pos;
-      // e = &renderer.ents[mouse.picked[i]];
-      DynArrayGet(&renderer.ents, i, &e);
+      int *id;
+
+      DynArrayGet(&mouse.picked, i, &id);   // get the id of the picked object.
+      DynArrayGet(&renderer.ents, *id, &e); // get the object itself.
+
+      if (KBTN_DOWN(E_EDIT_COPY) && KBTN_DOWN(C_CONTROL)) {
+        copy = true;
+        to_copy = i;
+        KBTN_RELEASE(E_EDIT_COPY);
+      }
+
       RenderMods m = {
           .color = &(vec4){1.0, 0.33, 0.33, 0.22},
           .scale_x = 1.05,
@@ -206,7 +214,11 @@ void rendererDrawAll(RenderPayload renderPayload) {
       }
       e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
     }
-    return;
+
+    if (copy) {
+      DynArrayAdd(&renderer.ents, &*e);
+      copy = false;
+    }
   }
 
   // case 2: we are actively looking for things to pick
@@ -463,7 +475,7 @@ void pickingRequestPick(PickingSystem *t, int mouseX, int mouseY) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void rendererPickingPhase(PickingSystem *t, DynArray *ents, int n,
+void rendererPickingPhase(PickingSystem *t, DynArray *ents,
                           RenderPayload renderPayload) {
   glBindFramebuffer(GL_FRAMEBUFFER, t->fbo);
   glUseProgram(t->shader);
@@ -472,7 +484,7 @@ void rendererPickingPhase(PickingSystem *t, DynArray *ents, int n,
   Entity *e;
   RenderInfo rinfo;
 
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < ents->len; i++) {
     shaderSetUnsignedInt(t->shader, "objectIndex", i + 1);
     DynArrayGet(ents, i, &e);
     // e = &ents[i];

@@ -17,6 +17,9 @@ typedef enum {
   P_ISO_TOGGLE,
   E_EDIT_ROTATE,
   E_EDIT_SCALE,
+  E_EDIT_COPY,
+  C_SHIFT,
+  C_CONTROL,
   N_PLAYER_BINDINGS
 } PlayerBinding;
 
