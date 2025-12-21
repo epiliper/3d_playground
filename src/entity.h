@@ -44,6 +44,7 @@ typedef struct {
   EntityType type;
   Renderable render;
   void *data;
+  uint16_t id;
 } Entity;
 
 void entityLoadFromData(void *data, uint8_t type, Body loc, Entity *dest);

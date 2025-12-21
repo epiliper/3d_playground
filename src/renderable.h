@@ -43,10 +43,10 @@ extern Renderer renderer;
 #define RENDERER_SLOT_EMPTY 1 >> 4
 
 // add an item to the renderer given a shape and tex id.
-void rendererAddItem(void *item, int shape, int tex);
+void rendererAddEntity(Entity *e);
 
 // delete an item given its id.
-void rendererDeleteItem(int id);
+void rendererDeleteEntity(int id);
 
 // create a renderer with space for at least @cap renderables (not necessarily
 // distinct shape/tex ids)

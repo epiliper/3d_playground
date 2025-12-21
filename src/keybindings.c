@@ -56,6 +56,7 @@ static const int K_CTRL = GLFW_KEY_LEFT_CONTROL;
 static const int K_EDIT_ROTATE = GLFW_KEY_R;
 static const int K_EDIT_SCALE = GLFW_KEY_X;
 static const int K_EDIT_COPY = GLFW_KEY_C;
+static const int K_EDIT_DELETE = GLFW_KEY_BACKSPACE;
 
 void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
                                   int action, int mods) {
@@ -88,6 +89,7 @@ void playerBindingsSetDefault(PlayerBindings *p) {
 
   KSET_BIND_CALLBACK(p, C_SHIFT, K_SHIFT);
   KSET_BIND(p, C_CONTROL, K_CTRL);
+  KSET_BIND_CALLBACK(p, E_EDIT_DELETE, K_EDIT_DELETE);
 
   KSET_BIND_CALLBACK(p, E_EDIT_COPY, K_EDIT_COPY);
 

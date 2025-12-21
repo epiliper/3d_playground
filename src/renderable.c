@@ -14,14 +14,17 @@ char infoLog[512];
 static float ROT_90_RAD;
 vec3 obj_rot_start;
 
-bool rotating;
+bool rotating = false;
 bool just_rotated;
 
-bool scaling;
+bool scaling = false;
 bool just_scaled;
 
-bool copy;
+bool copy = false;
 int to_copy;
+
+bool delete = false;
+int to_delete;
 
 //
 // Renderable
@@ -37,6 +40,27 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 //
 // Renderer
 //
+
+// add an entity and update its ID
+void rendererAddEntity(Entity *e) {
+  e->id = renderer.ents.len;
+  DynArrayAdd(&renderer.ents, e);
+}
+
+// remove an entity by id (linear search)
+void rendererDeleteEntity(int id) {
+  Entity *e = {0};
+
+  for (int i = 0; i < renderer.ents.len; i++) {
+    DynArrayGet(&renderer.ents, i, &e);
+    if (e->id == id) {
+      DynArraySwapRemove(&renderer.ents, i, NULL);
+      return;
+    }
+  }
+
+  printf("Attempting to delete entity that isn't there by id: %d\n", id);
+}
 
 Renderer renderer = {.ents = {0}, .track_picking = true};
 
@@ -174,6 +198,10 @@ void rendererDrawAll(RenderPayload renderPayload) {
         copy = true;
         to_copy = i;
         KBTN_RELEASE(E_EDIT_COPY);
+
+      } else if (KBTN_DOWN(E_EDIT_DELETE)) {
+        delete = true;
+        to_delete = i;
       }
 
       RenderMods m = {
@@ -212,17 +240,39 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
         glm_vec3_copy(drag_pos, e->loc.pos);
       }
+
       e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
     }
 
     if (copy) {
-      DynArrayAdd(&renderer.ents, &*e);
-      copy = false;
+      for (int i = 0; i < mouse.picked.len; i++) {
+        int *id;
+        Entity *e;
+        DynArrayGet(&mouse.picked, i, &id);
+        DynArrayGet(&renderer.ents, *id, &e);
+
+        rendererAddEntity(e);
+      }
+    }
+    copy = false;
+
+    if (delete) {
+      for (int i = 0; i < mouse.picked.len; i++) {
+        int *id;
+        DynArrayGet(&mouse.picked, i, &id);
+        rendererDeleteEntity(*id);
+      }
+
+      // update mouse selection so we aren't referencing deleted elements.
+      DynArrayClear(&mouse.picked);
+      delete = false;
+
+      picked = 0;
     }
   }
 
   // case 2: we are actively looking for things to pick
-  if (has_pick && picked != 0) {
+  else if (has_pick && picked != 0) {
     RenderMods m = {
         .color = &(vec4){0.33, 0.33, 1.0, 0.22},
         .scale_x = 1.05,
@@ -232,8 +282,9 @@ void rendererDrawAll(RenderPayload renderPayload) {
     };
 
     DynArrayGet(&renderer.ents, picked - 1, &e);
-    // e = &renderer.ents[picked - 1];
-    e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
+    if (e != NULL) {
+      e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
+    }
   };
 }
 

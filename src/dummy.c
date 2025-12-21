@@ -19,7 +19,8 @@ void testScenePrepare() {
       &testCube, ENT_CUBE,
       (Body){.pos = {0, 0, -5}, .rot = {0, 0, 0}, .height = 5, .width = 10},
       &e);
-  DynArrayAdd(&renderer.ents, &e);
+  rendererAddEntity(&e);
+  // DynArrayAdd(&renderer.ents, &e);
   // rendererAddItem(&testCube, 0, 0);
 
   glEnable(GL_DEPTH_TEST);

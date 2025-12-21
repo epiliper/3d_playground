@@ -40,7 +40,7 @@ void fpsCameraToggleIso(FPSCamera *c) {
     glm_vec3_copy(c->pos, last_pos);
     last_pitch = c->pitch;
     c->pitch = -89.0;
-    c->pos[1] += 30;
+    c->pos[1] += 60;
     c->mode = CAM_ISO;
     break;
 
