@@ -176,3 +176,111 @@ void cubeRender(Cube *c, Body *body, RenderInfo rinfo, RenderPayload r, RenderMo
 
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
+
+///
+/// GRID
+/// 
+
+// clang-format off
+float SQUARE_VERTICES[12] = {
+  -0.5, 0.5,  0.1, 
+  0.5,  0.5,  0.1,
+  0.5,  -0.5, 0.1,
+  -0.5, -0.5, 0.1
+};
+
+unsigned int SQUARE_INDICES[6] = {
+  0, 1, 2, 2, 3, 0
+};
+// clang-format on
+
+const char *gridVert = "#version 330 core\n"
+                       "layout (location = 0) in vec3 pos;\n"
+                       "uniform mat4 view;\n"
+                       "uniform mat4 projection;\n"
+                       "uniform mat4 model;\n"
+
+                       "out vec4 world_pos;\n"
+
+                       "void main() {\n"
+                       "world_pos = model * vec4(pos.xyz, 1.0);\n"
+                       "gl_Position = projection * view * world_pos;\n"
+                       "}";
+
+const char *gridFrag = "#version 330 core\n"
+
+                       "out vec4 out_color;\n"
+                       "in vec4 world_pos;\n"
+
+                       "uniform float linewidth;\n"
+
+                       "void main() {\n"
+                       "vec2 grid = abs(fract(world_pos.xz));\n"
+                       "float line = min(grid.x, grid.y);\n"
+
+                       "float linewidth = 0.02;\n"
+                       "vec3 color = vec3(0.2);\n"
+
+                       "if (line < linewidth) {\n"
+                       "color = vec3(0.8);\n"
+                       "}\n"
+
+                       "out_color = vec4(color, 1.0);\n"
+                       "}";
+
+// clang-format on
+//
+
+RenderInfo gridRenderInit() {
+  unsigned int vbo, vao, ebo, shader;
+
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  glGenBuffers(1, &ebo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(SQUARE_INDICES), SQUARE_INDICES,
+               GL_STATIC_DRAW);
+
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(SQUARE_VERTICES), SQUARE_VERTICES,
+               GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  shader = shaderFromCharVF(gridVert, gridFrag);
+
+  RenderInfo ret = {.vao = vao, .vbo = vbo, .ebo = ebo, .shader = shader};
+  return ret;
+}
+
+void gridRender(Grid *g, Body *body, RenderInfo rinfo, RenderPayload r,
+                RenderMods *mods) {
+  glBindVertexArray(rinfo.vao);
+  glUseProgram(rinfo.shader);
+
+  float scale_x = mods != NULL ? mods->scale_x : 1.0;
+  float scale_y = mods != NULL ? mods->scale_y : 1.0;
+  float scale_z = mods != NULL ? mods->scale_z : 1.0;
+
+  shaderSetMat4(rinfo.shader, "projection", *r.proj);
+  shaderSetMat4(rinfo.shader, "view", *r.view);
+  shaderSetVec3(rinfo.shader, "pos", body->pos);
+
+  mat4 model;
+  glm_mat4_identity(model);
+
+  glm_translate(model, body->pos); // move to pos
+  glm_rotate(model, glm_rad(body->rot[0]), (vec3){1, 0, 0});
+  glm_rotate(model, glm_rad(body->rot[1]), (vec3){0, 1, 0});
+  glm_scale(model,
+            (vec3){body->width * scale_x, body->height * scale_y, scale_z});
+
+  shaderSetMat4(rinfo.shader, "model", model);
+
+  shaderSetVec4(rinfo.shader, "line_color", g->line_color);
+
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+}

@@ -11,14 +11,24 @@ Cube testCube = {
     .color = {1, 1, 0, 1.0},
 };
 
+Grid testGrid = {.line_color = {1, 1, 0, 1.0}};
+
 void testScenePrepare() {
-  rendererInitWithCapacity(1);
+  rendererInitWithCapacity(2);
   pickingSystemInit(APP.window.resX, APP.window.resY);
   Entity e;
   entityLoadFromData(
       &testCube, ENT_CUBE,
       (Body){.pos = {0, 0, -5}, .rot = {0, 0, 0}, .height = 5, .width = 10},
       &e);
+  rendererAddEntity(&e);
+
+  entityLoadFromData(
+      &testGrid, ENT_GRID,
+      (Body){
+          .pos = {0, -1, -5}, .rot = {90, 0, 0}, .height = 1000, .width = 1000},
+      &e);
+
   rendererAddEntity(&e);
   // DynArrayAdd(&renderer.ents, &e);
   // rendererAddItem(&testCube, 0, 0);
