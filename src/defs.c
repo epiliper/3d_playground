@@ -1,4 +1,5 @@
 #include "defs.h"
+#include "renderable.h"
 #include "string.h" // memcpy
 #include "glad.h"
 
@@ -46,7 +47,36 @@ RenderInfo lineRendererInit() {
   return ret;
 }
 
-void lineRender() {
+void lineRender(Line2D line, Body *body, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
+  glBindVertexArray(rinfo.vao);
+  glUseProgram(rinfo.shader);
+
+  float scale_x = mods != NULL ? mods->scale_x : 1.0;
+  float scale_y = mods != NULL ? mods->scale_x : 1.0;
+  float scale_z = mods != NULL ? mods->scale_x : 1.0;
+
+  shaderSetMat4(rinfo.shader, "projection", *r.proj);
+  shaderSetMat4(rinfo.shader, "view", *r.proj);
+
+  mat4 model;
+  glm_mat4_identity(model);
+
+  glm_translate(model, (vec3){line.v1->x, line.v1->y, 1});
+
+  // calculate quaternation to represent angle between v1 and v2
+  vec3 original_dir;
+  vec4 quat;
+
+  // TODO: this needs to be cached; this is just the original vector between the two line points we upload to VBO at runtime init.
+  glm_vec2_sub((vec3){LINE_VERTICES[3], LINE_VERTICES[4], LINE_VERTICES[5]}, (vec3){LINE_VERTICES[0], LINE_VERTICES[1], LINE_VERTICES[2]}, original_dir);
+
+  glm_normalize(original_dir);
+  glm_quat_from_vecs(original_dir, (vec3){line.v2->x, line.v2->y, 1}, quat);
+  glm_quat_rotate(model, quat, model); // perform the quaternion rotation
+  
+  glm_scale_uni(model, 50); // thicc lines
+  shaderSetMat4(rinfo.shader, "model", model);
+  glDrawArrays(GL_LINES, 0, 2);
 }
 
 void beginDrawingSector(Vertex *first, uint16_t floor_height,
@@ -65,8 +95,8 @@ void renderSector2D(Sector *s, RenderInfo rinfo, RenderPayload r,
                     RenderMods *mods) {
   int i = 0;
   int j = 0;
-
   Vertex *v1, *v2;
+
   for (j = 1; i < s->verts.len; i++) {
     DynArrayGet(&s->verts, i, v1);
     DynArrayGet(&s->verts, j, v2);

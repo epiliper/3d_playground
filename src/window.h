@@ -5,6 +5,7 @@
 
 typedef struct {
   int monitor, resX, resY;
+  int fbX, fbY;
   void *inner;
 } Window;
 

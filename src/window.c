@@ -9,13 +9,16 @@
 
 #include "mouse.h"
 
-#define DEFAULT_WINDOW_WIDTH 640
-#define DEFAULT_WINDOW_HEIGHT 480
+#define WIN_FALLBACK_X 640
+#define WIN_FALLBACK_Y 480
 
-void getMonitorRes(GLFWmonitor *monitor, int *x, int *y) {
+// get monitor pixel X and Y without being befuddled by retina displays
+void getTrueMonitorRes(GLFWmonitor *monitor, int *x, int *y) {
   const GLFWvidmode *m = glfwGetVideoMode(monitor);
-  *x = m->width;
-  *y = m->height;
+  float scaleX, scaleY;
+  glfwGetMonitorContentScale(monitor, &scaleX, &scaleY);
+  *x = m->width * scaleX;
+  *y = m->height * scaleY;
 }
 
 static void error_callback(int error, const char *description) {
@@ -25,17 +28,20 @@ static void error_callback(int error, const char *description) {
 void windowCreate(Window *dest, const char *title) {
   glfwInit();
   GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+
   if (monitor != NULL) {
-    getMonitorRes(monitor, &dest->resX, &dest->resY);
+    getTrueMonitorRes(monitor, &dest->resX, &dest->resY);
   } else {
-    dest->resX = DEFAULT_WINDOW_WIDTH, dest->resY = DEFAULT_WINDOW_HEIGHT;
+    dest->resX = WIN_FALLBACK_X, dest->resY = WIN_FALLBACK_Y;
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-  printf("Monitor resolution x: %d | y: %d\n", dest->resX, dest->resY);
   dest->inner = glfwCreateWindow(dest->resX, dest->resY, title, monitor, NULL);
+
+  glfwGetWindowSize(dest->inner, &dest->resX, &dest->resY);
+  glfwGetFramebufferSize(dest->inner, &dest->fbX, &dest->fbY);
 
   glfwMakeContextCurrent(dest->inner);
   glfwSwapInterval(1); // running with vsync on
@@ -54,8 +60,7 @@ void windowCreate(Window *dest, const char *title) {
 
   mouseInit(dest);
 
-  // glfwSetInputMode(dest->inner, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+  glViewport(0, 0, dest->fbX, dest->fbY);
   fpsCameraChangeResolution(&fpsCamera, dest->resX, dest->resY);
 }
 bool windowShouldClose(Window *w) {
