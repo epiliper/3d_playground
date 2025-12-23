@@ -16,6 +16,7 @@ typedef struct {
   int width, height;
   mat4 view;
   mat4 projection;
+  mat4 ortho;
   vec3 front, up, right, pos;
   float fov;
   int mode;

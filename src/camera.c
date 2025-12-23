@@ -78,20 +78,33 @@ void fpsCameraViewMatrix(FPSCamera *c) {
   glm_lookat(c->pos, direction, c->up, c->view);
 }
 
-void fpsCameraProjectionMatrix(FPSCamera *c) {
+void fpsCameraPerspectiveMatrix(FPSCamera *c) {
   glm_perspective(glm_rad(c->fov), (float)c->width / c->height, 0.1f, 100.0f,
                   c->projection);
 }
 
+void fpsCameraOrthographicMatrix(FPSCamera *c) {
+  glm_ortho(0, c->width, 0, c->height, 0.1f, 100.0f, c->ortho);
+}
+
 void fpsCameraUpdateMatrices(FPSCamera *c) {
   fpsCameraViewMatrix(c);
-  fpsCameraProjectionMatrix(c);
+  // switch (c->mode) {
+  // case CAM_FPS:
+  //   fpsCameraPerspectiveMatrix(c);
+  //   break;
+  // case CAM_ISO:
+  //   fpsCameraOrthographicMatrix(c);
+  //   break;
+  // }
 }
 
 void fpsCameraChangeResolution(FPSCamera *c, float x, float y) {
   c->width = x;
   c->height = y;
   c->firstmouse = true;
+  fpsCameraOrthographicMatrix(c);
+  fpsCameraPerspectiveMatrix(c);
   fpsCameraUpdateMatrices(c);
 }
 

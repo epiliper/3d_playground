@@ -207,26 +207,48 @@ const char *gridVert = "#version 330 core\n"
                        "gl_Position = projection * view * world_pos;\n"
                        "}";
 
-const char *gridFrag = "#version 330 core\n"
-
-                       "out vec4 out_color;\n"
-                       "in vec4 world_pos;\n"
-
-                       "uniform float linewidth;\n"
-
-                       "void main() {\n"
-                       "vec2 grid = abs(fract(world_pos.xz));\n"
-                       "float line = min(grid.x, grid.y);\n"
-
-                       "float linewidth = 0.02;\n"
-                       "vec3 color = vec3(0.2);\n"
-
-                       "if (line < linewidth) {\n"
-                       "color = vec3(0.8);\n"
-                       "}\n"
-
-                       "out_color = vec4(color, 1.0);\n"
-                       "}";
+const char *gridFrag =
+    "#version 330 core\n"
+    "out vec4 out_color;\n"
+    "in vec4 world_pos;\n"
+    "uniform float linewidth;\n"
+    "\n"
+    "float grid_at_scale(vec2 pos, float scale) {\n"
+    "    vec2 grid = abs(fract(pos / scale));\n"
+    "    float line = min(grid.x, grid.y);\n"
+    "    float line_derivative = fwidth(line);\n"
+    "    float linewidth = 0.02;\n"
+    "    return 1.0 - smoothstep(linewidth - line_derivative * 3.0, \n"
+    "                            linewidth + line_derivative * 3.0, \n"
+    "                            line);\n"
+    "}\n"
+    "\n"
+    "void main() {\n"
+    "    vec2 world_derivative = fwidth(world_pos.xz);\n"
+    "    float max_derivative = max(world_derivative.x, world_derivative.y);\n"
+    "    \n"
+    "    // Fine grid (1 unit spacing)\n"
+    "    float grid_fine = grid_at_scale(world_pos.xz, 1.0);\n"
+    "    // Fade out when zoomed out\n"
+    "    float fade_fine = 1.0 - smoothstep(0.3, 1.0, max_derivative);\n"
+    "    grid_fine *= fade_fine;\n"
+    "    \n"
+    "    // Coarse grid (10 unit spacing) - thicker lines\n"
+    "    float grid_coarse = grid_at_scale(world_pos.xz, 10.0);\n"
+    "    // Fade in as fine grid fades out, fade out when very far\n"
+    "    float fade_coarse = smoothstep(0.5, 2.0, max_derivative) * \n"
+    "                        (1.0 - smoothstep(3.0, 10.0, max_derivative));\n"
+    "    grid_coarse *= fade_coarse;\n"
+    "    \n"
+    "    // Combine grids\n"
+    "    float grid_strength = max(grid_fine, grid_coarse * 0.7);\n"
+    "    \n"
+    "    vec3 background = vec3(0.2);\n"
+    "    vec3 line_color = vec3(0.8);\n"
+    "    vec3 color = mix(background, line_color, grid_strength);\n"
+    "    \n"
+    "    out_color = vec4(color, 1.0);\n"
+    "}";
 
 // clang-format on
 //
