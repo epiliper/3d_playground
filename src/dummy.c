@@ -9,7 +9,7 @@
 #include "defs.h"
 
 Cube testCube = {
-    .color = {1, 1, 0, 1.0},
+    .color = {0, 0, 1, 0.8},
 };
 
 Grid testGrid = {.line_color = {1, 1, 0, 1.0}};

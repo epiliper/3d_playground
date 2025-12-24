@@ -33,7 +33,8 @@ void mouseInit(Window *w) {
   mouse.right_dwn = false;
   mouse.moved = false;
   mouse.rotating = false;
-  glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+  // glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+  glfwSetInputMode(w->inner, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 //

@@ -118,6 +118,7 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
   uint32_t picked = 0;
   RenderInfo rinfo;
 
+  GLenum err = 0;
   for (int i = 0; i < renderer3D.ents.len; i++) {
     DynArrayGet(&renderer3D.ents, i, &e);
     rinfo = renderer3D.rinfo_man[e->type];
@@ -284,8 +285,6 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
       }
 
       RENDER(e, rinfo, renderPayload, &m);
-      // item->e.render.rfunc(item->e.data, &item->e.loc, item->e.render.rinfo,
-      //                      renderPayload, &m);
     }
 
     if (copy) {
@@ -437,32 +436,47 @@ unsigned int shaderFromCharVF(const char *vertcode, const char *fragcode) {
 }
 
 void shaderSetVec4(unsigned int shader, const char *uni, vec4 dat) {
-  unsigned int loc = glGetUniformLocation(shader, uni);
+  GLint loc = glGetUniformLocation(shader, uni);
+  // if (loc == -1) {
+  //   printf("Failed to find uniform %s\n", uni);
+  // }
   glUseProgram(shader);
   glUniform4fv(loc, 1, dat);
 }
 
 void shaderSetMat4(unsigned int shader, const char *uni, mat4 dat) {
-  unsigned int loc = glGetUniformLocation(shader, uni);
+  GLint loc = glGetUniformLocation(shader, uni);
+  if (loc == -1) {
+    printf("Failed to find uniform %s\n", uni);
+  }
   glUseProgram(shader);
   glUniformMatrix4fv(loc, 1, GL_FALSE, (float *)dat);
 }
 
 void shaderSetVec3(unsigned int shader, const char *uni, vec3 dat) {
-  unsigned int loc = glGetUniformLocation(shader, uni);
+  GLint loc = glGetUniformLocation(shader, uni);
+  if (loc == -1) {
+    printf("Failed to find uniform %s\n", uni);
+  }
   glUseProgram(shader);
   glUniform3fv(loc, 1, dat);
 }
 
 void shaderSetFloat(unsigned int shader, const char *uni, float dat) {
-  unsigned int loc = glGetUniformLocation(shader, uni);
+  GLint loc = glGetUniformLocation(shader, uni);
+  if (loc == -1) {
+    printf("Failed to find uniform %s\n", uni);
+  }
   glUseProgram(shader);
   glUniform1f(loc, dat);
 }
 
 void shaderSetUnsignedInt(unsigned int shader, const char *uni,
                           unsigned int dat) {
-  unsigned int loc = glGetUniformLocation(shader, uni);
+  GLint loc = glGetUniformLocation(shader, uni);
+  if (loc == -1) {
+    printf("Failed to find uniform %s\n", uni);
+  }
   glUseProgram(shader);
   glUniform1ui(loc, dat);
 }
@@ -489,12 +503,14 @@ const char *pickingVert =
     "1.0);\n"
     "}\n";
 
-const char *pickingFrag = "#version 330\n"
-                          "uniform uint objectIndex;\n"
-                          "out uint fragColor;\n"
-                          "void main() {\n"
-                          " fragColor = objectIndex;\n"
-                          "}";
+const char *pickingFrag =
+    "#version 330\n"
+    "uniform uint objectIndex;\n"
+    "uniform vec4 color;\n" // this is a placeholder to avoid opengl error 1281
+    "out uint fragColor;\n"
+    "void main() {\n"
+    " fragColor = objectIndex;\n"
+    "}";
 
 PickingSystem pickingSystem;
 

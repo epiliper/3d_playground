@@ -136,7 +136,7 @@ RenderInfo cubeRenderInit() {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   shader = shaderFromCharVF(cubeVert, cubeFrag);
@@ -155,8 +155,6 @@ void cubeRender(Cube *c, Body *body, RenderInfo rinfo, RenderPayload r, RenderMo
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);
-  shaderSetVec3(rinfo.shader, "pos", body->pos);
-
 
   mat4 model;
   glm_mat4_identity(model);
@@ -289,7 +287,6 @@ void gridRender(Grid *g, Body *body, RenderInfo rinfo, RenderPayload r,
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);
-  shaderSetVec3(rinfo.shader, "pos", body->pos);
 
   mat4 model;
   glm_mat4_identity(model);
@@ -302,7 +299,7 @@ void gridRender(Grid *g, Body *body, RenderInfo rinfo, RenderPayload r,
 
   shaderSetMat4(rinfo.shader, "model", model);
 
-  shaderSetVec4(rinfo.shader, "line_color", g->line_color);
+  // shaderSetVec4(rinfo.shader, "line_color", g->line_color);
 
   glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
