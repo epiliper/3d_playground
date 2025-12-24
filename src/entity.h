@@ -38,6 +38,7 @@ typedef struct {
 typedef enum {
   ENT_CUBE,
   ENT_GRID,
+  ENT_LINE,
 } EntityType;
 
 typedef struct {

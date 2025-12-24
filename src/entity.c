@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "cube.h"
+#include "defs.h"
 
 void entityLoadFromData(void *data, uint8_t type, Body loc, Entity *dest) {
 
@@ -13,6 +14,11 @@ void entityLoadFromData(void *data, uint8_t type, Body loc, Entity *dest) {
   case ENT_GRID:
     render.rfunc = (RenderFunc)gridRender;
     render.rinfo = gridRenderInit();
+    break;
+
+  case ENT_LINE:
+    render.rfunc = (RenderFunc)lineRender;
+    render.rinfo = lineRenderInit();
     break;
   }
 

@@ -6,12 +6,16 @@
 #include "renderable.h"
 #include "app.h"
 #include "entity.h"
+#include "defs.h"
 
 Cube testCube = {
     .color = {1, 1, 0, 1.0},
 };
 
 Grid testGrid = {.line_color = {1, 1, 0, 1.0}};
+
+Line2D testLine = {.v1 = &(Vertex){.x = 10, .y = 2},
+                   .v2 = &(Vertex){.x = 20, .y = 2}};
 
 void testScenePrepare() {
   rendererInitWithCapacity(2);
@@ -29,6 +33,9 @@ void testScenePrepare() {
           .pos = {0, -1, -5}, .rot = {90, 0, 0}, .height = 1000, .width = 1000},
       &e);
 
+  rendererAddEntity(&e);
+
+  entityLoadFromData(&testLine, ENT_LINE, (Body){0}, &e);
   rendererAddEntity(&e);
   // DynArrayAdd(&renderer.ents, &e);
   // rendererAddItem(&testCube, 0, 0);

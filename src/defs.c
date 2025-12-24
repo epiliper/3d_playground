@@ -13,24 +13,23 @@ const float LINE_VERTICES[6] = {
 };
 // clang-format off
 
-const char *lineVert = "version 330 core\n"
+const char *lineVert = "#version 330 core\n"
 "uniform mat4 projection;\n"
 "uniform mat4 view;\n"
 "uniform mat4 model;\n"
-"uniform vec3 pos;\n"
+"layout(location = 0) in vec3 pos;\n"
 "void main() {\n"
   "gl_Position = projection * view * model * vec4(pos, 1.0f);\n"
 "}";
 
-const char *lineFrag = "version 330 core\n"
-"uniform vec4 line_color;\n"
+const char *lineFrag = "#version 330 core\n"
 "out vec4 out_color;\n"
 "void main() {\n"
-"out_color = line_color;\n"
+"out_color = vec4(1.0, 1.0, 1.0, 0.5);\n"
 "}"
 ;
 
-RenderInfo lineRendererInit() {
+RenderInfo lineRenderInit() {
   unsigned int vao, vbo, shader;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -47,7 +46,7 @@ RenderInfo lineRendererInit() {
   return ret;
 }
 
-void lineRender(Line2D line, Body *body, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
+void lineRender(Line2D *line, Body *_body, RenderInfo rinfo, RenderPayload r, RenderMods *mods) {
   glBindVertexArray(rinfo.vao);
   glUseProgram(rinfo.shader);
 
@@ -56,26 +55,33 @@ void lineRender(Line2D line, Body *body, RenderInfo rinfo, RenderPayload r, Rend
   float scale_z = mods != NULL ? mods->scale_x : 1.0;
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
-  shaderSetMat4(rinfo.shader, "view", *r.proj);
+  shaderSetMat4(rinfo.shader, "view", *r.view);
+  vec3 pos = {line->v1->x, line->v1->y, 1};
 
   mat4 model;
   glm_mat4_identity(model);
+  glm_translate(model, pos);
 
-  glm_translate(model, (vec3){line.v1->x, line.v1->y, 1});
-
-  // calculate quaternation to represent angle between v1 and v2
-  vec3 original_dir;
-  vec4 quat;
-
-  // TODO: this needs to be cached; this is just the original vector between the two line points we upload to VBO at runtime init.
-  glm_vec2_sub((vec3){LINE_VERTICES[3], LINE_VERTICES[4], LINE_VERTICES[5]}, (vec3){LINE_VERTICES[0], LINE_VERTICES[1], LINE_VERTICES[2]}, original_dir);
-
-  glm_normalize(original_dir);
-  glm_quat_from_vecs(original_dir, (vec3){line.v2->x, line.v2->y, 1}, quat);
-  glm_quat_rotate(model, quat, model); // perform the quaternion rotation
+  vec3 target_dir = {
+    line->v2->x - line->v1->x,
+    line->v2->y - line->v1->y,
+    1.0f  // Assuming 2D, z difference is 0
+  };
   
-  glm_scale_uni(model, 50); // thicc lines
+  float length = glm_vec3_norm(target_dir); // line length
+  glm_normalize(target_dir); // direction
+  
+  vec3 original_dir = {1.0f, 1.0f, 1.0f}; // dir of our indices
+  glm_normalize(original_dir);
+  
+  vec4 quat;
+  glm_quat_from_vecs(original_dir, target_dir, quat); // calc rotation to go from indices angle to line angle
+  glm_quat_rotate(model, quat, model);
+  
+  glm_scale_uni(model, length);
+  
   shaderSetMat4(rinfo.shader, "model", model);
+  glLineWidth(4.0f);
   glDrawArrays(GL_LINES, 0, 2);
 }
 
@@ -91,18 +97,26 @@ void stopDrawingSector(Sector *dest) {
   memcpy(dest, &stagingSector, sizeof(Sector));
 }
 
-void renderSector2D(Sector *s, RenderInfo rinfo, RenderPayload r,
+void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
                     RenderMods *mods) {
   int i = 0;
   int j = 0;
-  Vertex *v1, *v2;
+  Line2D line = {0};
 
   for (j = 1; i < s->verts.len; i++) {
-    DynArrayGet(&s->verts, i, v1);
-    DynArrayGet(&s->verts, j, v2);
+    DynArrayGet(&s->verts, i, line.v1);
+    DynArrayGet(&s->verts, j, line.v2);
+
+    lineRender(&line, _body, rinfo, r, mods);
 
     i++;
   }
+
+  // now render the line connecting the last vertex to the first one
+  DynArrayGet(&s->verts, s->verts.len - 1, line.v1);
+  DynArrayGet(&s->verts, 0, line.v2);
+
+  lineRender(&line, _body, rinfo, r, mods);
 }
 
 void renderSector3D(Sector *s, RenderInfo rinfo, RenderPayload r,

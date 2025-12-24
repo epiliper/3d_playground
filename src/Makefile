@@ -4,16 +4,19 @@ GL := thirdparty/glad.c
 
 MAKE_BUILD_DIR := $(shell mkdir -p $(BUILD_DIR))
 
-editor: main.c window dummy renderable utils state mouse state.c camera keybindings utils glad app cube entity dynarray
+editor: main.c window dummy renderable utils state mouse state.c camera keybindings utils glad app cube entity dynarray defs
 	gcc -o editor main.c $(BUILD_DIR)/window.o $(BUILD_DIR)/keybindings.o \
 		state.c $(BUILD_DIR)/renderable.o $(BUILD_DIR)/mouse.o $(BUILD_DIR)/dummy.o \
 		$(BUILD_DIR)/camera.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/app.o $(BUILD_DIR)/cube.o \
-		$(BUILD_DIR)/entity.o $(BUILD_DIR)/dynarray.o \
+		$(BUILD_DIR)/entity.o $(BUILD_DIR)/dynarray.o $(BUILD_DIR)/defs.o \
 		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS);
 	./editor
 
 dynarray: dynarray.h dynarray.c
 	gcc -c dynarray.c -o $(BUILD_DIR)/dynarray.o $(CFLAGS)
+
+defs: defs.c defs.h
+	gcc -c defs.c -o $(BUILD_DIR)/defs.o
 
 renderable: renderable.h renderable.c
 	gcc -c renderable.c -o $(BUILD_DIR)/renderable.o $(CFLAGS)

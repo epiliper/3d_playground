@@ -32,8 +32,13 @@ void beginDrawingSector(Vertex *first, uint16_t floor_height,
 // store the completed sector in some dest
 void stopDrawingSector(Sector *dest);
 
-void renderSector2D(Sector *s, RenderInfo rinfo, RenderPayload r,
+void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
                     RenderMods *mods);
 
 void renderSector3D(Sector *s, RenderInfo rinfo, RenderPayload r,
                     RenderMods *mods);
+
+void lineRender(Line2D *line, Body *body, RenderInfo rinfo, RenderPayload r,
+                RenderMods *mods);
+
+RenderInfo lineRenderInit();
