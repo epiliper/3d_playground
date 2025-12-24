@@ -2,8 +2,6 @@
 
 #include <math.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define WORLDUP {0, 1, 0}
 

@@ -25,34 +25,36 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // The renderer contains a list of objects that can be rendered, with the
 // rendering functions and info assigned during the loading phase, before
 // anything is rendered.
+
+typedef struct {
+  DynArray textures;
+} TextureManager;
+
 typedef struct {
   DynArray ents;
   bool track_picking;
+  RenderInfo rinfo_man[ENT_N_TYPES];
+  TextureManager texman;
 } Renderer;
 
-typedef struct {
-} RenderInfoManager;
-
-typedef struct {
-
-} TextureManager;
-
-extern Renderer renderer;
+extern Renderer renderer3D;
+extern Renderer renderer2D;
 
 // const int RENDERER_SLOT_EMPTY = 1 << 4;
 #define RENDERER_SLOT_EMPTY 1 >> 4
 
 // add an item to the renderer given a shape and tex id.
-void rendererAddEntity(Entity *e);
+void rendererAddEntity(Renderer *r, Entity *e);
 
 // delete an item given its id.
-void rendererDeleteEntity(int id);
+void rendererDeleteEntity(Renderer *r, int id);
 
 // create a renderer with space for at least @cap renderables (not necessarily
 // distinct shape/tex ids)
-void rendererInitWithCapacity(int cap);
+void rendererInitWithCapacity(Renderer *r, int cap);
 
-void rendererDrawAll(RenderPayload renderPayload);
+void rendererDrawAll2D(RenderPayload renderPayload);
+void rendererDrawAll3D(RenderPayload renderPayload);
 
 // ======
 // Shader

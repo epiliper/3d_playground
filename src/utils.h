@@ -16,6 +16,6 @@ typedef struct {
 // Given screen coordinates and a point on that screen, return the position in
 // worldspace.
 void castRay(vec3 origin, vec2 screenRes, vec2 cursorPos, mat4 view,
-             mat4 projection, Ray *r);
+             mat4 projection, Ray *r, bool dir);
 
 #endif

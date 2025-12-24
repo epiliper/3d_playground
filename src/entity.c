@@ -5,20 +5,20 @@
 void entityLoadFromData(void *data, uint8_t type, Body loc, Entity *dest) {
 
   Renderable render;
+  render.init = RENDER_UNINIT;
 
   switch (type) {
   case ENT_CUBE:
     render.rfunc = (RenderFunc)cubeRender;
-    render.rinfo = cubeRenderInit();
+    render.rinitfunc = (RenderInitFunc)cubeRenderInit;
     break;
   case ENT_GRID:
     render.rfunc = (RenderFunc)gridRender;
-    render.rinfo = gridRenderInit();
+    render.rinitfunc = gridRenderInit;
     break;
-
   case ENT_LINE:
     render.rfunc = (RenderFunc)lineRender;
-    render.rinfo = lineRenderInit();
+    render.rinitfunc = lineRenderInit;
     break;
   }
 

@@ -26,19 +26,34 @@ typedef struct {
   float height, width;
 } Body;
 
+// Function to render the entity
 typedef void (*RenderFunc)(void *self, Body *body, RenderInfo rinfo,
                            RenderPayload r, RenderMods *mods);
 
+// Function initializing VAO, VBO, EBO, and shader.
+typedef RenderInfo (*RenderInitFunc)();
+
+enum { RENDER_INIT, RENDER_UNINIT };
+
 // A wrapper around data that describes how it is rendered.
+//
+// the render info is can already initialized by the time the entity is loaded,
+// in which case a handle is returned to the entity instead of cloning VBOS,
+// VAOs, etc...
 typedef struct {
   RenderFunc rfunc;
-  RenderInfo rinfo;
+  union {
+    RenderInitFunc rinitfunc;
+    unsigned int rinfo;
+  };
+  int init;
 } Renderable;
 
 typedef enum {
   ENT_CUBE,
   ENT_GRID,
   ENT_LINE,
+  ENT_N_TYPES,
 } EntityType;
 
 typedef struct {
@@ -49,5 +64,6 @@ typedef struct {
   uint16_t id;
 } Entity;
 
+// load an entity from generic data and assign its function pointers.
 void entityLoadFromData(void *data, uint8_t type, Body loc, Entity *dest);
 #endif

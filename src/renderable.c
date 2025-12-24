@@ -1,4 +1,5 @@
 #include "renderable.h"
+#include "entity.h"
 #include "glad.h"
 #include "utils.h"
 #include "string.h" // memset
@@ -7,6 +8,7 @@
 #include "camera.h"
 #include <stdbool.h>
 #include "keybindings.h"
+#include "defs.h"
 
 int success;
 char infoLog[512];
@@ -26,6 +28,22 @@ int to_copy;
 bool delete = false;
 int to_delete;
 
+// shorthand for getting a ray's direction in 3d space from mouse
+#define CAST_RAY_DIR(dest)                                                     \
+  castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},             \
+          (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,                 \
+          *renderPayload.proj, dest, true);
+
+// shorthand for getting ray's position from mouse
+#define CAST_RAY_POS(dest)                                                     \
+  castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},             \
+          (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,                 \
+          *renderPayload.proj, dest, false);
+
+// shorthand for rendering RenderItem
+#define RENDER(e, rinfo, rpayload, mods)                                       \
+  e->render.rfunc(e->data, &e->loc, rinfo, rpayload, mods);
+
 //
 // Renderable
 //
@@ -41,20 +59,33 @@ void renderableCreate(void *obj, void (*init)(RenderInfo *r),
 // Renderer
 //
 
-// add an entity and update its ID
-void rendererAddEntity(Entity *e) {
-  e->id = renderer.ents.len;
-  DynArrayAdd(&renderer.ents, e);
+// add an entity, update its ID, and check if we need to initialize its
+// rendering functions
+void rendererAddEntity(Renderer *r, Entity *e) {
+  e->id = renderer3D.ents.len;
+
+  // render data not yet initialized
+  if (r->rinfo_man[e->type].vao == 0) {
+    printf("Initializing rinfo for type %d\n", e->type);
+    RenderInfo rinfo = (e->render.rinitfunc)();
+    r->rinfo_man[e->type] = rinfo;
+  } else {
+    printf("Render info for type %d already initialized\n", e->type);
+  }
+
+  e->render.rinfo = e->type;
+  e->render.init = RENDER_INIT;
+  DynArrayAdd(&renderer3D.ents, e);
 }
 
 // remove an entity by id (linear search)
-void rendererDeleteEntity(int id) {
-  Entity *e = {0};
+void rendererDeleteEntity(Renderer *r, int id) {
+  Entity *e;
 
-  for (int i = 0; i < renderer.ents.len; i++) {
-    DynArrayGet(&renderer.ents, i, &e);
+  for (int i = 0; i < r->ents.len; i++) {
+    DynArrayGet(&r->ents, i, &e);
     if (e->id == id) {
-      DynArraySwapRemove(&renderer.ents, i, NULL);
+      DynArraySwapRemove(&r->ents, i, NULL);
       return;
     }
   }
@@ -62,34 +93,40 @@ void rendererDeleteEntity(int id) {
   printf("Attempting to delete entity that isn't there by id: %d\n", id);
 }
 
-Renderer renderer = {.ents = {0}, .track_picking = true};
+Renderer renderer3D = {.ents = {0}, .track_picking = true};
+Renderer renderer2D = {.ents = {0}, .track_picking = true};
 
 const int RENDER_SLOT_EMPTY = 1 << 10;
 
-void rendererInitWithCapacity(int cap) {
+void rendererInitWithCapacity(Renderer *r, int cap) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   ROT_90_RAD = glm_rad(15.0f);
 
-  if (renderer.ents.len != 0) {
-    DynArrayDestroy(&renderer.ents);
+  if (r->ents.len != 0) {
+    DynArrayDestroy(&r->ents);
   }
 
   // TODO: Handle errors here.
   // renderer.ents = malloc(sizeof(Entity) * cap);
-  DynArrayInit(&renderer.ents, cap, Entity);
+  DynArrayInit(&r->ents, cap, Entity);
+  DynArrayInit(&r->texman.textures, cap, unsigned int);
 }
 
-void rendererDrawAll(RenderPayload renderPayload) {
+void rendererDrawAll3D(RenderPayload renderPayload) {
   Entity *e;
   uint32_t picked = 0;
+  RenderInfo rinfo;
 
-  for (int i = 0; i < renderer.ents.len; i++) {
-    DynArrayGet(&renderer.ents, i, &e);
-    e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, NULL);
+  for (int i = 0; i < renderer3D.ents.len; i++) {
+    DynArrayGet(&renderer3D.ents, i, &e);
+    rinfo = renderer3D.rinfo_man[e->type];
+    RENDER(e, rinfo, renderPayload, NULL);
+    // item->e.render.rfunc(item->e.data, &item->e.loc, rinfo, renderPayload,
+    //                      NULL);
   }
 
-  rendererPickingPhase(&pickingSystem, &renderer.ents, renderPayload);
+  rendererPickingPhase(&pickingSystem, &renderer3D.ents, renderPayload);
 
   pickingRequestPick(&pickingSystem, mouse.xpos, mouse.ypos);
 
@@ -144,8 +181,8 @@ void rendererDrawAll(RenderPayload renderPayload) {
       just_rotated = false;
       glm_vec3_copy((vec3){change_x, change_y, 0}, rotate);
 
-      // we just released the rotate button, so calculate the mouse offset from
-      // the start of the rotation
+      // we just released the rotate button, so calculate the mouse
+      // offset from the start of the rotation
       if (!KBTN_DOWN(E_EDIT_ROTATE)) {
         rotating = false;
       }
@@ -172,27 +209,32 @@ void rendererDrawAll(RenderPayload renderPayload) {
       just_scaled = false;
       glm_vec3_copy((vec3){change_x, change_y, 0}, scale);
 
-      // we just released the rotate button, so calculate the mouse offset from
-      // the start of the rotation
+      // we just released the rotate button, so calculate the mouse
+      // offset from the start of the rotation
       if (!KBTN_DOWN(E_EDIT_SCALE)) {
         scaling = false;
       }
     }
 
-    // this entire branch needs to be a function... It's going to get big real
-    // fast
+    // this entire branch needs to be a function... It's going to
+    // get big real fast
     Ray ray;
-    castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},
-            (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,
-            *renderPayload.proj, &ray);
+    CAST_RAY_DIR(&ray);
+    // castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},
+    //         (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,
+    //         *renderPayload.proj, &ray);
 
     Body b;
     for (int i = 0; i < mouse.picked.len; i++) {
       vec3 pos;
       int *id;
 
-      DynArrayGet(&mouse.picked, i, &id);   // get the id of the picked object.
-      DynArrayGet(&renderer.ents, *id, &e); // get the object itself.
+      DynArrayGet(&mouse.picked, i,
+                  &id); // get the id of the picked object.
+      DynArrayGet(&renderer3D.ents, *id,
+                  &e); // get the object itself.
+
+      rinfo = renderer3D.rinfo_man[e->type];
 
       if (KBTN_DOWN(E_EDIT_COPY) && KBTN_DOWN(C_CONTROL)) {
         copy = true;
@@ -241,7 +283,9 @@ void rendererDrawAll(RenderPayload renderPayload) {
         glm_vec3_copy(drag_pos, e->loc.pos);
       }
 
-      e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
+      RENDER(e, rinfo, renderPayload, &m);
+      // item->e.render.rfunc(item->e.data, &item->e.loc, item->e.render.rinfo,
+      //                      renderPayload, &m);
     }
 
     if (copy) {
@@ -249,9 +293,9 @@ void rendererDrawAll(RenderPayload renderPayload) {
         int *id;
         Entity *e;
         DynArrayGet(&mouse.picked, i, &id);
-        DynArrayGet(&renderer.ents, *id, &e);
+        DynArrayGet(&renderer3D.ents, *id, &e);
 
-        rendererAddEntity(e);
+        rendererAddEntity(&renderer3D, e);
       }
     }
     copy = false;
@@ -260,10 +304,11 @@ void rendererDrawAll(RenderPayload renderPayload) {
       for (int i = 0; i < mouse.picked.len; i++) {
         int *id;
         DynArrayGet(&mouse.picked, i, &id);
-        rendererDeleteEntity(*id);
+        rendererDeleteEntity(&renderer3D, *id);
       }
 
-      // update mouse selection so we aren't referencing deleted elements.
+      // update mouse selection so we aren't referencing deleted
+      // elements.
       DynArrayClear(&mouse.picked);
       delete = false;
 
@@ -281,11 +326,33 @@ void rendererDrawAll(RenderPayload renderPayload) {
 
     };
 
-    DynArrayGet(&renderer.ents, picked - 1, &e);
+    DynArrayGet(&renderer3D.ents, picked - 1, &e);
+    rinfo = renderer3D.rinfo_man[e->type];
+
     if (e != NULL) {
-      e->render.rfunc(e->data, &e->loc, e->render.rinfo, renderPayload, &m);
+      RENDER(e, rinfo, renderPayload, &m);
+      // item->render.rfunc(item->data, &item->loc, item->render.rinfo,
+      //                    renderPayload, &m);
     }
   };
+}
+
+void rendererDrawAll2D(RenderPayload renderPayload) {
+  Vertex v;
+  Ray r;
+  if (mouse.left_dwn) {
+    CAST_RAY_POS(&r);
+    v.x = r.dir[0];
+    v.y = r.dir[1];
+    if (drawing_sector) {
+      if (sectorAddVertex(&v) == SECTOR_CYCLE)
+        printf("Cycle detected\n");
+    } else {
+      beginDrawingSector(&v, 10, 20);
+    }
+
+    mouse.left_dwn = false;
+  }
 }
 
 //
@@ -404,9 +471,10 @@ void shaderSetUnsignedInt(unsigned int shader, const char *uni,
 /// PICKING
 ///
 ///
-/// Using OGLDev's approach: write to a texture in a second framebuffer, read
-/// it during rendering the primary buffer to see if our mouse position
-/// overlaps with an object index written to the buffer.
+/// Using OGLDev's approach: write to a texture in a second
+/// framebuffer, read it during rendering the primary buffer to see
+/// if our mouse position overlaps with an object index written to
+/// the buffer.
 
 // Shaders for painting a buffer with object IDs.
 
@@ -417,7 +485,8 @@ const char *pickingVert =
     "uniform mat4 view;\n"
     "uniform mat4 model;\n"
     "void main() {\n"
-    " gl_Position = projection * view * model * vec4(position, 1.0);\n"
+    " gl_Position = projection * view * model * vec4(position, "
+    "1.0);\n"
     "}\n";
 
 const char *pickingFrag = "#version 330\n"
@@ -539,10 +608,12 @@ void rendererPickingPhase(PickingSystem *t, DynArray *ents,
     shaderSetUnsignedInt(t->shader, "objectIndex", i + 1);
     DynArrayGet(ents, i, &e);
     // e = &ents[i];
-    rinfo = e->render.rinfo;
+    //
+    rinfo = renderer3D.rinfo_man[e->type];
     rinfo.shader = t->shader;
 
-    e->render.rfunc(e->data, &e->loc, rinfo, renderPayload, NULL);
+    RENDER(e, rinfo, renderPayload, NULL);
+    // e->render.rfunc(e->data, &e->loc, rinfo, renderPayload, NULL);
   }
 
   // reset

@@ -1,9 +1,11 @@
 #include "defs.h"
+#include "dynarray.h"
 #include "renderable.h"
 #include "string.h" // memcpy
 #include "glad.h"
 
 Sector stagingSector = {0};
+bool drawing_sector;
 
 // clang-format off
 const float LINE_VERTICES[6] = {
@@ -25,7 +27,7 @@ const char *lineVert = "#version 330 core\n"
 const char *lineFrag = "#version 330 core\n"
 "out vec4 out_color;\n"
 "void main() {\n"
-"out_color = vec4(1.0, 1.0, 1.0, 0.5);\n"
+"out_color = vec4(0.0, 0.0, 1.0, 0.5);\n"
 "}"
 ;
 
@@ -91,6 +93,20 @@ void beginDrawingSector(Vertex *first, uint16_t floor_height,
   stagingSector.ceil_height = ceil_height;
   stagingSector.floor_height = floor_height;
   DynArrayAdd(&stagingSector.verts, first);
+}
+
+int sectorAddVertex(Vertex *v) {
+  if (&stagingSector.verts.len > 0) {
+    Vertex *start;
+    DynArrayGet(&stagingSector.verts, 0, start);
+    // we've gone full circle. Stop
+    if (start->x == v->x && start->y == v->y) {
+      return SECTOR_CYCLE;
+    }
+
+  }
+  DynArrayAdd(&stagingSector.verts,  v);
+  return SECTOR_CONTINUE;
 }
 
 void stopDrawingSector(Sector *dest) {

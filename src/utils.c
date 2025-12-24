@@ -55,9 +55,36 @@ void rayDirection(vec3 origin, int screenResX, int screenResY, double cursorX,
   glm_vec3_copy(NDC, dest);
 }
 
+void rayPosition(vec3 origin, int screenResX, int screenResY, double cursorX,
+                 double cursorY, mat4 view, mat4 projection, vec3 dest) {
+
+  vec4 NDC = {
+      2.0f * cursorX / (float)screenResX - 1.0f,
+      1.0f - 2.0f * (cursorY / screenResY),
+      -1.0f,
+      1.0f,
+  };
+
+  mat4 viewinv;
+  mat4 projinv;
+
+  glm_mat4_inv(projection, projinv);
+  glm_mat4_mulv(projinv, NDC, NDC); // reverse projection matrix
+  NDC[2] = -1.0f;
+  NDC[3] = 0.0f;
+
+  glm_mat4_inv(view, viewinv);
+  glm_mat4_mulv(viewinv, NDC, NDC); // reverse view matrix
+  glm_normalize(NDC);               // and get direction.
+  // glm_vec3_copy(NDC, dest);
+}
+
 void castRay(vec3 origin, vec2 screenRes, vec2 cursorPos, mat4 view,
-             mat4 projection, Ray *r) {
+             mat4 projection, Ray *r, bool dir) {
   rayDirection(origin, screenRes[0], screenRes[1], cursorPos[0], cursorPos[1],
                view, projection, r->dir);
+  if (dir)
+    glm_normalize(r->dir);
+
   glm_vec3_copy(origin, r->origin);
 }

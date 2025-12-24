@@ -22,12 +22,19 @@ typedef struct {
   uint16_t ceil_height;
 } Sector;
 
-// temporary sector we use before storing someplace
+extern bool drawing_sector;
 extern Sector stagingSector;
+
+enum {
+  SECTOR_CONTINUE,
+  SECTOR_CYCLE,
+};
 
 // start drawing a sector from a single vertex
 void beginDrawingSector(Vertex *first, uint16_t floor_height,
                         uint16_t ceil_height);
+
+int sectorAddVertex(Vertex *v);
 
 // store the completed sector in some dest
 void stopDrawingSector(Sector *dest);
