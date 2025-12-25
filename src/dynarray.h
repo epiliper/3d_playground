@@ -19,6 +19,7 @@ typedef struct {
 
 DynArray _DynArrayInit(int cap, int stride);
 void DynArrayGrow(DynArray *d);
+DynArray DynArrayClone(DynArray *src);
 void DynArrayClear(DynArray *d);
 void DynArrayAdd(DynArray *d, void *item);
 void *_DynArrayGet(DynArray *d, int idx);

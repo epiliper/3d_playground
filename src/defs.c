@@ -3,6 +3,7 @@
 #include "renderable.h"
 #include "string.h" // memcpy
 #include "glad.h"
+#include <math.h>
 
 Sector stagingSector = {
     .ceil_height = 10,
@@ -17,8 +18,7 @@ RenderInfo sectorRenderInfo = {0};
 // clang-format off
 const float LINE_VERTICES[6] = {
   0.0f, 0.0f, 0.0f,
-  1.0f, 1.0f, 1.0f
-
+  1.0f, 0.0f, 0.0f, 
 };
 // clang-format off
 
@@ -65,7 +65,7 @@ void lineRender(Line2D *line, Body *_body, RenderInfo rinfo, RenderPayload r, Re
 
   shaderSetMat4(rinfo.shader, "projection", *r.proj);
   shaderSetMat4(rinfo.shader, "view", *r.view);
-  vec3 pos = {line->v1->x, line->v1->y, 1};
+  vec3 pos = {line->v1->x, 0.0f, line->v1->y};
 
   mat4 model;
   glm_mat4_identity(model);
@@ -73,14 +73,15 @@ void lineRender(Line2D *line, Body *_body, RenderInfo rinfo, RenderPayload r, Re
 
   vec3 target_dir = {
     line->v2->x - line->v1->x,
+    0.0,
     line->v2->y - line->v1->y,
-    1.0f  // Assuming 2D, z difference is 0
+    // 1.0f  // Assuming 2D, z difference is 0
   };
   
   float length = glm_vec3_norm(target_dir); // line length
   glm_normalize(target_dir); // direction
   
-  vec3 original_dir = {1.0f, 1.0f, 1.0f}; // dir of our indices
+  vec3 original_dir = {1.0f, 0.0f, 0.0f}; // dir of our indices
   glm_normalize(original_dir);
   
   vec4 quat;
@@ -103,22 +104,29 @@ void beginDrawingSector(Vertex *first, uint16_t floor_height,
 }
 
 int sectorAddVertex(Vertex *v) {
+  bool repeat = false;
+
   if (&stagingSector.verts.len > 0) {
     Vertex *start;
     start = DynArrayGet(&stagingSector.verts, 0);
     // we've gone full circle. Stop
-    if (start->x == v->x && start->y == v->y) {
-      printf("CYCLE\n");
-      return SECTOR_CYCLE;
+    if (fabs(start->x - v->x) <= 0.5 && fabs(start->y - v->y) <= 0.5) {
+      printf("REPEAT\n");
+      repeat = true;
     }
-
   }
   DynArrayAdd(&stagingSector.verts,  v);
-  return SECTOR_CONTINUE;
+  if (repeat) { return SECTOR_CYCLE; } else { return SECTOR_CONTINUE; }
 }
 
 void stopDrawingSector(Sector *dest) {
   memcpy(dest, &stagingSector, sizeof(Sector));
+}
+
+void sectorClone(Sector *src, Sector *dest) {
+  memcpy(dest, src, sizeof(Sector));
+  dest->verts = DynArrayClone(&src->verts);
+
 }
 
 void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
@@ -128,26 +136,20 @@ void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
   Line2D line = {0};
 
   if (s->verts.len < 2) return;
-
-  for (j = 1; j < s->verts.len; j++) {
+  
+  // Draw lines connecting consecutive vertices
+  for (int i = 0; i < s->verts.len - 1; i++) {
     line.v1 = DynArrayGet(&s->verts, i);
-    line.v2 = DynArrayGet(&s->verts, j);
-
-    // printf("V1: %d %d\n", line.v1->x, line.v1->y);
-    // printf("V2: %d %d\n", line.v2->x, line.v2->y);
-
-
+    line.v2 = DynArrayGet(&s->verts, i + 1);
     lineRender(&line, _body, rinfo, r, mods);
-
-    i++;
   }
 
-  // now render the line connecting the last vertex to the first one
-  line.v1 = DynArrayGet(&s->verts, s->verts.len - 1);
-  line.v2 = DynArrayGet(&s->verts, 0);
+  // // now render the line connecting the last vertex to the first one
+  // line.v1 = DynArrayGet(&s->verts, s->verts.len - 1);
+  // line.v2 = DynArrayGet(&s->verts, 0);
 
 
-  lineRender(&line, _body, rinfo, r, mods);
+  // lineRender(&line, _body, rinfo, r, mods);
 }
 
 void renderSector3D(Sector *s, RenderInfo rinfo, RenderPayload r,

@@ -6,7 +6,7 @@
 
 // a point in 2D space
 typedef struct {
-  uint16_t x, y;
+  float x, y;
 } Vertex;
 
 // temporary struct to store two vertices for rendering purposes
@@ -48,5 +48,7 @@ void renderSector3D(Sector *s, RenderInfo rinfo, RenderPayload r,
 
 void lineRender(Line2D *line, Body *body, RenderInfo rinfo, RenderPayload r,
                 RenderMods *mods);
+
+void sectorClone(Sector *src, Sector *dest);
 
 RenderInfo lineRenderInit();

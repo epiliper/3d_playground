@@ -13,6 +13,13 @@ DynArray _DynArrayInit(int init_cap, int stride) {
   return ret;
 }
 
+DynArray DynArrayClone(DynArray *src) {
+  DynArray ret = _DynArrayInit(src->cap, src->stride);
+  memcpy(ret.data, src->data, src->stride * src->len);
+  ret.len = src->len;
+  return ret;
+}
+
 // grow to accomodate more elements.
 void DynArrayGrow(DynArray *d) {
   d->cap = d->cap == 0 ? 1 : d->cap;

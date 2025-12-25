@@ -32,13 +32,7 @@ int to_delete;
 #define CAST_RAY_DIR(dest)                                                     \
   castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},             \
           (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,                 \
-          *renderPayload.proj, dest, true);
-
-// shorthand for getting ray's position from mouse
-#define CAST_RAY_POS(dest)                                                     \
-  castRay(fpsCamera.pos, (vec2){APP.window.resX, APP.window.resY},             \
-          (vec2){mouse.xpos, mouse.ypos}, *renderPayload.view,                 \
-          *renderPayload.proj, dest, false);
+          *renderPayload.proj, dest);
 
 // shorthand for rendering RenderItem
 #define RENDER(e, rinfo, rpayload, mods)                                       \
@@ -328,8 +322,6 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
 
     if (e != NULL) {
       RENDER(e, rinfo, renderPayload, &m);
-      // item->render.rfunc(item->data, &item->loc, item->render.rinfo,
-      //                    renderPayload, &m);
     }
   };
 }
@@ -337,24 +329,44 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
 void rendererDrawAll2D(RenderPayload renderPayload) {
   Vertex v;
   Ray r;
+  vec3 world_pos;
+  Entity *e;
+
   if (mouse.left_dwn) {
-    CAST_RAY_POS(&r);
-    printf("MOUSE CAST: %f %f\n", r.dir[0], r.dir[2]);
-    v.x = r.dir[0];
-    v.y = r.dir[2]; // z coordinate is y when we're top-down 2D.
+    CAST_RAY_DIR(&r);
+
+    float t = fpsCamera.pos[1] / -r.dir[1];
+
+    // we angle the ray between the camera and the world floor to the direction
+    // we get from our raycast.
+    world_pos[0] = fpsCamera.pos[0] + r.dir[0] * t;
+    world_pos[1] = 0;
+    world_pos[2] = fpsCamera.pos[2] + r.dir[2] * t;
+
+    v.x = world_pos[0];
+    v.y = world_pos[2]; // z coordinate is y when we're top-down 2D.
     if (drawing_sector) {
       if (sectorAddVertex(&v) == SECTOR_CYCLE) {
-        printf("Cycle detected\n");
+        Entity e;
+        entityLoadFromData(&stagingSector, ENT_SECTOR, (Body){0}, &e);
+        DynArrayAdd(&renderer2D.ents, &e);
+        DynArrayClear(&stagingSector.verts);
         drawing_sector = false;
       }
     } else {
       beginDrawingSector(&v, 10, 20);
+      drawing_sector = true;
     }
 
     mouse.left_dwn = false;
   }
 
   renderSector2D(&stagingSector, NULL, sectorRenderInfo, renderPayload, NULL);
+
+  for (int i = 0; i < renderer2D.ents.len; i++) {
+    e = DynArrayGet(&renderer2D.ents, i);
+    RENDER(e, sectorRenderInfo, renderPayload, NULL);
+  }
 }
 
 //

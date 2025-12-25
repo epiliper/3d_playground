@@ -33,6 +33,8 @@ typedef void (*RenderFunc)(void *self, Body *body, RenderInfo rinfo,
 // Function initializing VAO, VBO, EBO, and shader.
 typedef RenderInfo (*RenderInitFunc)();
 
+typedef void (*CloneFunc)(void *self, void *dest);
+
 enum { RENDER_INIT, RENDER_UNINIT };
 
 // A wrapper around data that describes how it is rendered.
@@ -53,6 +55,7 @@ typedef enum {
   ENT_CUBE,
   ENT_GRID,
   ENT_LINE,
+  ENT_SECTOR,
   ENT_N_TYPES,
 } EntityType;
 
@@ -61,6 +64,7 @@ typedef struct {
   EntityType type;
   Renderable render;
   void *data;
+  CloneFunc clonefunc;
   uint16_t id;
 } Entity;
 

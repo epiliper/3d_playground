@@ -22,6 +22,8 @@ Line2D testLine2 = {.v1 = &(Vertex){.x = 25, .y = 2},
 
 void testScenePrepare() {
   rendererInitWithCapacity(&renderer3D, 2);
+  rendererInitWithCapacity(&renderer2D, 2);
+
   pickingSystemInit(APP.window.resX, APP.window.resY);
   Entity e;
   entityLoadFromData(
