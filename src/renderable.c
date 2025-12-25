@@ -83,7 +83,7 @@ void rendererDeleteEntity(Renderer *r, int id) {
   Entity *e;
 
   for (int i = 0; i < r->ents.len; i++) {
-    DynArrayGet(&r->ents, i, &e);
+    e = DynArrayGet(&r->ents, i);
     if (e->id == id) {
       DynArraySwapRemove(&r->ents, i, NULL);
       return;
@@ -109,8 +109,8 @@ void rendererInitWithCapacity(Renderer *r, int cap) {
 
   // TODO: Handle errors here.
   // renderer.ents = malloc(sizeof(Entity) * cap);
-  DynArrayInit(&r->ents, cap, Entity);
-  DynArrayInit(&r->texman.textures, cap, unsigned int);
+  r->ents = DynArrayInit(cap, Entity);
+  r->texman.textures = DynArrayInit(cap, unsigned int);
 }
 
 void rendererDrawAll3D(RenderPayload renderPayload) {
@@ -120,7 +120,7 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
 
   GLenum err = 0;
   for (int i = 0; i < renderer3D.ents.len; i++) {
-    DynArrayGet(&renderer3D.ents, i, &e);
+    e = DynArrayGet(&renderer3D.ents, i);
     rinfo = renderer3D.rinfo_man[e->type];
     RENDER(e, rinfo, renderPayload, NULL);
     // item->e.render.rfunc(item->e.data, &item->e.loc, rinfo, renderPayload,
@@ -230,10 +230,8 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
       vec3 pos;
       int *id;
 
-      DynArrayGet(&mouse.picked, i,
-                  &id); // get the id of the picked object.
-      DynArrayGet(&renderer3D.ents, *id,
-                  &e); // get the object itself.
+      id = DynArrayGet(&mouse.picked, i); // get the id of the picked object.
+      e = DynArrayGet(&renderer3D.ents, *id); // get the object itself.
 
       rinfo = renderer3D.rinfo_man[e->type];
 
@@ -291,8 +289,8 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
       for (int i = 0; i < mouse.picked.len; i++) {
         int *id;
         Entity *e;
-        DynArrayGet(&mouse.picked, i, &id);
-        DynArrayGet(&renderer3D.ents, *id, &e);
+        id = DynArrayGet(&mouse.picked, i);
+        e = DynArrayGet(&renderer3D.ents, *id);
 
         rendererAddEntity(&renderer3D, e);
       }
@@ -302,7 +300,7 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
     if (delete) {
       for (int i = 0; i < mouse.picked.len; i++) {
         int *id;
-        DynArrayGet(&mouse.picked, i, &id);
+        id = DynArrayGet(&mouse.picked, i);
         rendererDeleteEntity(&renderer3D, *id);
       }
 
@@ -325,7 +323,7 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
 
     };
 
-    DynArrayGet(&renderer3D.ents, picked - 1, &e);
+    e = DynArrayGet(&renderer3D.ents, picked - 1);
     rinfo = renderer3D.rinfo_man[e->type];
 
     if (e != NULL) {
@@ -341,17 +339,22 @@ void rendererDrawAll2D(RenderPayload renderPayload) {
   Ray r;
   if (mouse.left_dwn) {
     CAST_RAY_POS(&r);
+    printf("MOUSE CAST: %f %f\n", r.dir[0], r.dir[2]);
     v.x = r.dir[0];
-    v.y = r.dir[1];
+    v.y = r.dir[2]; // z coordinate is y when we're top-down 2D.
     if (drawing_sector) {
-      if (sectorAddVertex(&v) == SECTOR_CYCLE)
+      if (sectorAddVertex(&v) == SECTOR_CYCLE) {
         printf("Cycle detected\n");
+        drawing_sector = false;
+      }
     } else {
       beginDrawingSector(&v, 10, 20);
     }
 
     mouse.left_dwn = false;
   }
+
+  renderSector2D(&stagingSector, NULL, sectorRenderInfo, renderPayload, NULL);
 }
 
 //
@@ -622,7 +625,7 @@ void rendererPickingPhase(PickingSystem *t, DynArray *ents,
 
   for (int i = 0; i < ents->len; i++) {
     shaderSetUnsignedInt(t->shader, "objectIndex", i + 1);
-    DynArrayGet(ents, i, &e);
+    e = DynArrayGet(ents, i);
     // e = &ents[i];
     //
     rinfo = renderer3D.rinfo_man[e->type];

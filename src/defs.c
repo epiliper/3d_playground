@@ -4,8 +4,15 @@
 #include "string.h" // memcpy
 #include "glad.h"
 
-Sector stagingSector = {0};
+Sector stagingSector = {
+    .ceil_height = 10,
+    .floor_height = 0,
+    .verts =
+        (DynArray){.data = NULL, .cap = 0, .len = 0, .stride = sizeof(Vertex)}};
+
 bool drawing_sector;
+
+RenderInfo sectorRenderInfo = {0};
 
 // clang-format off
 const float LINE_VERTICES[6] = {
@@ -98,9 +105,10 @@ void beginDrawingSector(Vertex *first, uint16_t floor_height,
 int sectorAddVertex(Vertex *v) {
   if (&stagingSector.verts.len > 0) {
     Vertex *start;
-    DynArrayGet(&stagingSector.verts, 0, start);
+    start = DynArrayGet(&stagingSector.verts, 0);
     // we've gone full circle. Stop
     if (start->x == v->x && start->y == v->y) {
+      printf("CYCLE\n");
       return SECTOR_CYCLE;
     }
 
@@ -119,9 +127,15 @@ void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
   int j = 0;
   Line2D line = {0};
 
-  for (j = 1; i < s->verts.len; i++) {
-    DynArrayGet(&s->verts, i, line.v1);
-    DynArrayGet(&s->verts, j, line.v2);
+  if (s->verts.len < 2) return;
+
+  for (j = 1; j < s->verts.len; j++) {
+    line.v1 = DynArrayGet(&s->verts, i);
+    line.v2 = DynArrayGet(&s->verts, j);
+
+    // printf("V1: %d %d\n", line.v1->x, line.v1->y);
+    // printf("V2: %d %d\n", line.v2->x, line.v2->y);
+
 
     lineRender(&line, _body, rinfo, r, mods);
 
@@ -129,8 +143,9 @@ void renderSector2D(Sector *s, Body *_body, RenderInfo rinfo, RenderPayload r,
   }
 
   // now render the line connecting the last vertex to the first one
-  DynArrayGet(&s->verts, s->verts.len - 1, line.v1);
-  DynArrayGet(&s->verts, 0, line.v2);
+  line.v1 = DynArrayGet(&s->verts, s->verts.len - 1);
+  line.v2 = DynArrayGet(&s->verts, 0);
+
 
   lineRender(&line, _body, rinfo, r, mods);
 }

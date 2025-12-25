@@ -9,7 +9,7 @@ editor: main.c window dummy renderable utils state mouse state.c camera keybindi
 		state.c $(BUILD_DIR)/renderable.o $(BUILD_DIR)/mouse.o $(BUILD_DIR)/dummy.o \
 		$(BUILD_DIR)/camera.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/glad.o $(BUILD_DIR)/app.o $(BUILD_DIR)/cube.o \
 		$(BUILD_DIR)/entity.o $(BUILD_DIR)/dynarray.o $(BUILD_DIR)/defs.o \
-		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS);
+		$(shell pkg-config --libs glfw3 cglm) $(CFLAGS) -fsanitize=address;
 	./editor
 
 dynarray: dynarray.h dynarray.c

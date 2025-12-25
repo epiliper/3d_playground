@@ -13,17 +13,15 @@ typedef struct {
 
 #define DYNARRAY_RESIZE_FACTOR 2
 
-#define DynArrayInit(dest, init_cap, type)                                     \
-  _DynArrayInit(dest, init_cap, sizeof(type))
+#define DynArrayInit(init_cap, type) _DynArrayInit(init_cap, sizeof(type))
 
-#define DynArrayGet(arr, idx, single_ptr)                                      \
-  _DynArrayGet(arr, idx, (void **)single_ptr)
+#define DynArrayGet(arr, idx) _DynArrayGet(arr, idx)
 
-void _DynArrayInit(DynArray *d, int cap, int stride);
+DynArray _DynArrayInit(int cap, int stride);
 void DynArrayGrow(DynArray *d);
 void DynArrayClear(DynArray *d);
 void DynArrayAdd(DynArray *d, void *item);
-void _DynArrayGet(DynArray(*d), int idx, void **dest);
+void *_DynArrayGet(DynArray *d, int idx);
 void DynArraySwapRemove(DynArray *d, int idx, void *dest);
 void DynArrayDestroy(DynArray *d);
 void DynArrayTest();

@@ -4,15 +4,18 @@
 #include "dynarray.h"
 
 // initialize to a particular item size and capacity
-void _DynArrayInit(DynArray *dest, int init_cap, int stride) {
-  dest->data = malloc(init_cap * stride);
-  dest->len = 0;
-  dest->cap = init_cap;
-  dest->stride = stride;
+DynArray _DynArrayInit(int init_cap, int stride) {
+  DynArray ret;
+  ret.data = malloc(init_cap * stride);
+  ret.len = 0;
+  ret.cap = init_cap;
+  ret.stride = stride;
+  return ret;
 }
 
 // grow to accomodate more elements.
 void DynArrayGrow(DynArray *d) {
+  d->cap = d->cap == 0 ? 1 : d->cap;
   d->data = realloc(d->data, d->cap * DYNARRAY_RESIZE_FACTOR * d->stride);
   d->cap *= DYNARRAY_RESIZE_FACTOR;
 }
@@ -21,19 +24,19 @@ void DynArrayGrow(DynArray *d) {
 void DynArrayAdd(DynArray *d, void *item) {
   if (d->len >= d->cap) {
     DynArrayGrow(d);
+    // printf("Growing dynarray from length %lu\n", d->len);
   }
 
   memcpy(&d->data[d->len * d->stride], item, d->stride);
   d->len++;
 }
 
-void _DynArrayGet(DynArray *d, int idx, void **dest) {
+void *_DynArrayGet(DynArray *d, int idx) {
   if (idx >= d->len) {
-    *dest = NULL;
-    return;
+    return NULL;
   }
 
-  *dest = &d->data[idx * d->stride];
+  return &d->data[idx * d->stride];
 }
 
 // replace the element at idx with the one at the very end.
@@ -65,8 +68,7 @@ void DynArrayDestroy(DynArray *d) {
 }
 
 void DynArrayTest() {
-  DynArray test;
-  DynArrayInit(&test, 1, int);
+  DynArray test = DynArrayInit(1, int);
 
   int element = 1;
   DynArrayAdd(&test, &element);
@@ -90,8 +92,8 @@ void DynArrayTest() {
 
   int *got;
 
-  DynArrayGet(&test, 0, &got);
+  got = DynArrayGet(&test, 0);
   printf("Element at index 0: %d\n", *got);
-  DynArrayGet(&test, 1, &got);
+  got = DynArrayGet(&test, 1);
   printf("Element at index 1: %d\n", *got);
 }

@@ -44,8 +44,17 @@ void testScenePrepare() {
   entityLoadFromData(&testLine2, ENT_LINE, (Body){0}, &e);
   rendererAddEntity(&renderer3D, &e);
 
+  sectorRenderInfo = lineRenderInit();
+
   glEnable(GL_DEPTH_TEST);
 }
+
+enum {
+  EDITOR_2D,
+  EDITOR_3D,
+};
+
+static int editor_state = EDITOR_3D;
 
 void testSceneProcessInput() {
 #define CMOVE 0.1
@@ -63,6 +72,7 @@ void testSceneProcessInput() {
   }
   if (KBTN_DOWN(P_ISO_TOGGLE)) {
     fpsCameraToggleIso(&fpsCamera);
+    editor_state = editor_state == EDITOR_3D ? EDITOR_2D : EDITOR_3D;
     KBTN_RELEASE(P_ISO_TOGGLE);
   }
 }
@@ -75,5 +85,9 @@ void testSceneRender() {
 
   RenderPayload r = {.proj = &fpsCamera.projection, .view = &fpsCamera.view};
 
-  rendererDrawAll3D(r);
+  if (editor_state == EDITOR_3D) {
+    rendererDrawAll3D(r);
+  } else {
+    rendererDrawAll2D(r);
+  }
 }

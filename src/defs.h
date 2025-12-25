@@ -24,6 +24,7 @@ typedef struct {
 
 extern bool drawing_sector;
 extern Sector stagingSector;
+extern RenderInfo sectorRenderInfo;
 
 enum {
   SECTOR_CONTINUE,
