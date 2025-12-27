@@ -38,7 +38,7 @@ void fpsCameraToggleIso(FPSCamera *c) {
     glm_vec3_copy(c->pos, last_pos);
     last_pitch = c->pitch;
     c->pitch = -89.0;
-    c->pos[1] += 60;
+    c->pos[1] += 99.0;
     c->mode = CAM_ISO;
     break;
 
@@ -77,7 +77,7 @@ void fpsCameraViewMatrix(FPSCamera *c) {
 }
 
 void fpsCameraPerspectiveMatrix(FPSCamera *c) {
-  glm_perspective(glm_rad(c->fov), (float)c->width / c->height, 0.1f, 100.0f,
+  glm_perspective(glm_rad(c->fov), (float)c->width / c->height, 0.1f, 1000.0f,
                   c->projection);
 }
 
@@ -85,17 +85,7 @@ void fpsCameraOrthographicMatrix(FPSCamera *c) {
   glm_ortho(0, c->width, 0, c->height, 0.1f, 100.0f, c->ortho);
 }
 
-void fpsCameraUpdateMatrices(FPSCamera *c) {
-  fpsCameraViewMatrix(c);
-  // switch (c->mode) {
-  // case CAM_FPS:
-  //   fpsCameraPerspectiveMatrix(c);
-  //   break;
-  // case CAM_ISO:
-  //   fpsCameraOrthographicMatrix(c);
-  //   break;
-  // }
-}
+void fpsCameraUpdateMatrices(FPSCamera *c) { fpsCameraViewMatrix(c); }
 
 void fpsCameraChangeResolution(FPSCamera *c, float x, float y) {
   c->width = x;
