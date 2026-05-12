@@ -87,6 +87,10 @@ void windowStartFrame(Window *w) { glfwPollEvents(); }
 
 void windowEndFrame(Window *w) { glfwSwapBuffers(w->inner); }
 
+void windowSignalClose(Window *w) {
+    glfwSetWindowShouldClose(w->inner, GLFW_TRUE);
+}
+
 void windowClose(Window *w) {
   glfwDestroyWindow(w->inner);
   glfwTerminate();

@@ -9,6 +9,8 @@ Things implemented:
 - using the mouse to manipulate objects in the world
 - a 3D grid showing world units
 
+![screenshot](imgs/screenshot1.png)
+
 TODO: 
 - implement NVIDIA PhysX (have code for a C/C++ ABI) lying around for gravity/movement/collision
 - add 3d models and animations
@@ -26,3 +28,10 @@ cd src/
 make
 ./editor
 ```
+
+# Controls
+1. WASD to move the camera
+2. hold space while moving the mouse to pan
+3. Left click on objects to select them for editing
+4. move mouse to move objects, hold R and drag the mouse left-right to rotate along y-axis, bottom-up to rotate along x-axis
+

@@ -55,5 +55,5 @@ void applicationRun() {
 }
 
 void applicationSignalClose() {
-	windowClose(&APP.window);
+	windowSignalClose(&APP.window);
 }

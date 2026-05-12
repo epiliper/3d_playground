@@ -26,5 +26,8 @@ void windowEndFrame(Window *w);
 // Window termination procedure
 void windowClose(Window *w);
 
+// Signal window to close
+void windowSignalClose(Window *w);
+
 bool windowShouldClose(Window *w);
 #endif
