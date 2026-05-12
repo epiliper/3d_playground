@@ -58,6 +58,10 @@ static const int K_EDIT_SCALE = GLFW_KEY_X;
 static const int K_EDIT_COPY = GLFW_KEY_C;
 static const int K_EDIT_DELETE = GLFW_KEY_BACKSPACE;
 
+static const int K_EDIT_PAN = GLFW_KEY_SPACE;
+
+static const int K_EDIT_QUIT = GLFW_KEY_ESCAPE;
+
 void playerBindingsCheckCallbacks(GLFWwindow *w, int key, int scancode,
                                   int action, int mods) {
   for (int i = 0; i < playerBindings.callbacks.n; i++) {
@@ -96,6 +100,8 @@ void playerBindingsSetDefault(PlayerBindings *p) {
   KSET_BIND_CALLBACK(p, P_ISO_TOGGLE, K_CAM_ISO);
   KSET_BIND(p, E_EDIT_ROTATE, K_EDIT_ROTATE);
   KSET_BIND(p, E_EDIT_SCALE, K_EDIT_SCALE);
+  KSET_BIND(p, E_EDIT_QUIT, K_EDIT_QUIT);
+  KSET_BIND(p, E_EDIT_PAN, K_EDIT_PAN);
 }
 
 // TODO: update this to detect key collision logic.

@@ -20,4 +20,7 @@ void applicationRun();
 // event loop for entire app
 void applicationEventLoop();
 
+// tell to close
+void applicationSignalClose();
+
 #endif

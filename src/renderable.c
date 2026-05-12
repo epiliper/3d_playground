@@ -127,7 +127,7 @@ void rendererDrawAll3D(RenderPayload renderPayload) {
 
   bool has_pick = pickingGetAsync(&pickingSystem, &picked);
 
-  if (mouse.mid_dwn) {
+  if (KBTN_DOWN(E_EDIT_PAN)) {
     fpsCameraPan(mouse.xpos, mouse.ypos, &fpsCamera);
   } else {
     fpsCamera.firstmouse = true;

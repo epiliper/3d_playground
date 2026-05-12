@@ -53,3 +53,7 @@ void applicationRun() {
 
   windowClose(&APP.window);
 }
+
+void applicationSignalClose() {
+	windowClose(&APP.window);
+}

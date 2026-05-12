@@ -77,6 +77,10 @@ void testSceneProcessInput() {
     editor_state = editor_state == EDITOR_3D ? EDITOR_2D : EDITOR_3D;
     KBTN_RELEASE(P_ISO_TOGGLE);
   }
+
+  if (KBTN_DOWN(E_EDIT_QUIT)) {
+  	applicationSignalClose();
+  }
 }
 
 void testSceneRender() {
@@ -87,9 +91,5 @@ void testSceneRender() {
 
   RenderPayload r = {.proj = &fpsCamera.projection, .view = &fpsCamera.view};
 
-  if (editor_state == EDITOR_3D) {
-    rendererDrawAll3D(r);
-  } else {
-    rendererDrawAll2D(r);
-  }
+	rendererDrawAll3D(r);
 }

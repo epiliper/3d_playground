@@ -1,158 +1,266 @@
 [
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "keybindings.c",
-   "-o",
-   "build/keybindings.o"
-  ],
-  "file": "keybindings.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "window.c",
-   "build/keybindings.o",
-   "-o",
-   "build/window.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "window.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-o",
-   "editor",
-   "main.c",
-   "build/window.o",
-   "build/keybindings.o",
-   "-L/opt/homebrew/Cellar/glfw/3.4/lib",
-   "-lglfw",
-   "-L/opt/homebrew/Cellar/cglm/0.9.6/lib",
-   "-lcglm",
-   "-lm",
-   "-Ithirdparty -g3 -g -o"
-  ],
-  "file": "main.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "dummy.c",
-   "-o",
-   "build/dummy.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "dummy.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "renderable.c",
-   "-o",
-   "build/renderable.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "renderable.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "utils.c",
-   "-o",
-   "build/utils.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "utils.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "state.c",
-   "-o",
-   "build/state.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "state.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "mouse.c",
-   "-o",
-   "build/mouse.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "mouse.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-c",
-   "camera.c",
-   "-o",
-   "build/camera.o",
-   "-Ithirdparty",
-   "-g3",
-   "-g"
-  ],
-  "file": "camera.c"
- },
- {
-  "directory": "/Users/eli/SHARE/editor/src",
-  "arguments": [
-   "gcc",
-   "-o",
-   "editor",
-   "main.c",
-   "build/window.o",
-   "build/keybindings.o",
-   "state.c",
-   "build/renderable.o",
-   "build/mouse.o",
-   "build/dummy.o",
-   "build/camera.o",
-   "thirdparty/glad.c",
-   "build/utils.o",
-   "-L/opt/homebrew/Cellar/glfw/3.4/lib",
-   "-lglfw",
-   "-L/opt/homebrew/Cellar/cglm/0.9.6/lib",
-   "-lcglm",
-   "-lm",
-   "-Ithirdparty",
-   "-g3",
-   "-g",
-   "-fsanitize=address"
-  ],
-  "file": "thirdparty/glad.c"
- }
+  {
+    "file": "keybindings.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "keybindings.c",
+      "-o",
+      "build/keybindings.o",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/keybindings.o"
+  },
+  {
+    "file": "window.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "window.c",
+      "-o",
+      "build/window.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/window.o"
+  },
+  {
+    "file": "cube.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "cube.c",
+      "-o",
+      "build/cube.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/cube.o"
+  },
+  {
+    "file": "dummy.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "dummy.c",
+      "-o",
+      "build/dummy.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/dummy.o"
+  },
+  {
+    "file": "renderable.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "renderable.c",
+      "-o",
+      "build/renderable.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/renderable.o"
+  },
+  {
+    "file": "utils.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "utils.c",
+      "-o",
+      "build/utils.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/utils.o"
+  },
+  {
+    "file": "state.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "state.c",
+      "-o",
+      "build/state.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/state.o"
+  },
+  {
+    "file": "mouse.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "mouse.c",
+      "-o",
+      "build/mouse.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/mouse.o"
+  },
+  {
+    "file": "camera.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "camera.c",
+      "-o",
+      "build/camera.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/camera.o"
+  },
+  {
+    "file": "glad.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "glad.c",
+      "-o",
+      "build/glad.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/glad.o"
+  },
+  {
+    "file": "app.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "app.c",
+      "-o",
+      "build/app.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/app.o"
+  },
+  {
+    "file": "entity.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "entity.c",
+      "-o",
+      "build/entity.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/entity.o"
+  },
+  {
+    "file": "dynarray.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "dynarray.c",
+      "-o",
+      "build/dynarray.o",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/dynarray.o"
+  },
+  {
+    "file": "defs.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "defs.c",
+      "-o",
+      "build/defs.o",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "build/defs.o"
+  },
+  {
+    "file": "main.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-o",
+      "editor",
+      "main.c",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "editor"
+  },
+  {
+    "file": "state.c",
+    "arguments": [
+      "/usr/bin/gcc",
+      "-o",
+      "editor",
+      "state.c",
+      "-Ithirdparty",
+      "-g3",
+      "-g",
+      "-I",
+      "/opt/homebrew/include"
+    ],
+    "directory": "/Users/eli/clones/3d_playground/src",
+    "output": "editor"
+  }
 ]
